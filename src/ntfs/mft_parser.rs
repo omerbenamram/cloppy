@@ -55,10 +55,10 @@ impl MftParser {
     }
 
     pub fn fix_dir_hardlinks(&mut self) {
-        assert_eq!(self.faulty.len(), self.candidates.len());
+        debug_assert_eq!(self.faulty.len(), self.candidates.len());
         for mut f in self.faulty.drain(..) {
-            assert!(self.candidates.contains_key(&f.fr_number()));
-            let mut fix = self.candidates.remove(&f.fr_number()).unwrap();
+            debug_assert!(self.candidates.contains_key(&f.fr_number()));
+            let fix = self.candidates.remove(&f.fr_number()).unwrap();
             f.name_attrs = fix.name_attrs;
             self.files.push(f);
         }

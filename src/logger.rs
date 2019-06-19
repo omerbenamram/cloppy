@@ -9,6 +9,5 @@ pub fn setup() -> Logger {
     let drain = FullFormat::new(decorator).build().fuse();
     let drain = Async::new(drain).build().fuse();
 
-    let log = Logger::root(drain, o!());
-    log
+    Logger::root(drain, o!())
 }

@@ -40,13 +40,7 @@ pub fn main() -> Connection {
     let conn = Connection::open("test.db").unwrap();
 //    let conn = Connection::open_in_memory().unwrap();
 
-    conn.query_row("PRAGMA encoding;", &[], |row| {
-        let x: String = row.get(0);
-        assert_eq!("UTF-8", x);
-    }).unwrap();
-
-
-    conn.execute(CREATE_DB, &[]).unwrap();
+    conn.execute(CREATE_DB, params![]).unwrap();
     conn.prepare_cached(INSERT_FILE).unwrap();
     conn.prepare_cached(UPDATE_FILE).unwrap();
     conn.prepare_cached(DELETE_FILE).unwrap();
@@ -96,7 +90,7 @@ pub fn insert_files(files: &[FileRecord]) {
     {
         let mut stmt = tx.prepare_cached(INSERT_FILE).unwrap();
         for file in files {
-            &file.name_attrs.iter().filter(|n| n.namespace != 2).for_each(|name| {
+            file.name_attrs.iter().filter(|n| n.namespace != 2).for_each(|name| {
                 stmt.execute_named(&[
                     (":id", &file.header.fr_number),
                     (":parent_id", &(name.parent_id as u32)),
@@ -117,12 +111,12 @@ pub fn insert_files(files: &[FileRecord]) {
 
 pub fn load_all_arena() -> Result<(Files)> {
     let con = Connection::open("test.db").unwrap();
-    let count = con.query_row(SELECT_COUNT_ALL, &[], |r| r.get::<i32, u32>(0) as usize).unwrap();
+    let count = con.query_row(SELECT_COUNT_ALL, params![], |r| r.get::<usize, u32>(0)).unwrap() as usize;
     let mut stmt = con.prepare(SELECT_ALL_FILES).unwrap();
-    let result = stmt.query_map(&[], FileEntity::from_file_row).unwrap();
+    let result = stmt.query_map(params![], FileEntity::from_file_row).unwrap();
     let mut files = Vec::with_capacity(count);
     for file in result {
-        let f: FileEntity = file??;
+        let f: FileEntity = file?;
         files.push(f);
     }
     let mut arena = Files::new(count);

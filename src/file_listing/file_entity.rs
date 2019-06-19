@@ -16,13 +16,11 @@ pub struct FileEntity {
     flags: u16,
 }
 
-
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialOrd, PartialEq, Hash)]
 pub struct FileId {
     id: u32,
     f_type: FileType,
 }
-
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub enum FileType {
@@ -40,19 +38,24 @@ impl From<UsnRecord> for FileId {
     }
 }
 
-
 impl FileId {
     pub fn file(id: u32) -> FileId {
-        FileId { id, f_type: FileType::FILE }
+        FileId {
+            id,
+            f_type: FileType::FILE,
+        }
     }
     pub fn directory(id: u32) -> FileId {
-        FileId { id, f_type: FileType::DIRECTORY }
+        FileId {
+            id,
+            f_type: FileType::DIRECTORY,
+        }
     }
-    pub fn id(&self) -> u32 {
+    pub fn id(self) -> u32 {
         self.id
     }
 
-    pub fn f_type(&self) -> FileType {
+    pub fn f_type(self) -> FileType {
         self.f_type
     }
 }
@@ -60,11 +63,14 @@ impl FileId {
 impl From<FileRecord> for FileEntity {
     fn from(file: FileRecord) -> Self {
         let fr_number = file.fr_number();
-        let name = file.name_attrs.into_iter()
+        let name = file
+            .name_attrs
+            .into_iter()
             .filter(|n| n.namespace != DOS_NAMESPACE)
             .take(1)
             .next()
-            .expect(&format!("Found a file record without name: {}", fr_number));
+            .unwrap_or_else(|| panic!("Found a file record without name: {}", fr_number));
+
         let id = if file.header.flags & 0x02 != 0 {
             FileId::directory(file.header.fr_number)
         } else {
@@ -83,17 +89,24 @@ impl From<FileRecord> for FileEntity {
 
 impl FileEntity {
     pub fn from_file_row(row: &Row) -> Result<FileEntity> {
-        let _id = row.get::<i32, u32>(0);
-        let parent_id = FileId::directory(row.get::<i32, i64>(2) as u32);
-        let size = row.get::<i32, i64>(4);
-        let name = row.get::<i32, String>(5);
-        let flags = row.get::<i32, u16>(8);
+        let _id = row.get::<usize, u32>(0)?;
+        let parent_id = FileId::directory(row.get::<usize, i64>(2)? as u32);
+        let size = row.get::<usize, i64>(4)?;
+        let name = row.get::<usize, String>(5)?;
+        let flags = row.get::<usize, u16>(8)?;
         let id = if flags & 0x02 != 0 {
-            FileId::directory(row.get::<i32, u32>(1))
+            FileId::directory(row.get::<usize, u32>(1)?)
         } else {
-            FileId::file(row.get::<i32, u32>(1))
+            FileId::file(row.get::<usize, u32>(1)?)
         };
-        Ok(FileEntity { name, parent_id, size, id, _id, flags })
+        Ok(FileEntity {
+            name,
+            parent_id,
+            size,
+            id,
+            _id,
+            flags,
+        })
     }
 
     pub fn id(&self) -> FileId {
@@ -116,7 +129,6 @@ impl FileEntity {
         self.flags
     }
 }
-
 
 #[cfg(test)]
 mod tests {

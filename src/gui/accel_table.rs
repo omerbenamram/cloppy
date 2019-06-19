@@ -2,6 +2,7 @@ use gui::utils;
 use std::io;
 use winapi::shared::windef::HACCEL;
 use winapi::um::winuser::*;
+
 pub const ID_SELECT_ALL: u16 = 0x8000;
 pub const ID_FILL_LIST: u16 = 0x8001;
 
