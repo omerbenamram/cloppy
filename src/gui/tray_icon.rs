@@ -4,8 +4,8 @@ use crate::actions::SimpleAction;
 use crate::gui::event::Event;
 use crate::gui::utils;
 use crate::gui::utils::ToWide;
-use crate::gui::WM_SYSTRAYICON;
 use crate::gui::wnd;
+use crate::gui::WM_SYSTRAYICON;
 use crate::resources;
 use std::io;
 use std::mem;
@@ -19,17 +19,32 @@ use winapi::um::shellapi::*;
 use winapi::um::winuser::*;
 
 pub struct TrayIcon {
-    data: NOTIFYICONDATAW
+    data: NOTIFYICONDATAW,
 }
 
 impl TrayIcon {
     unsafe fn load_icon_byte() -> io::Result<HICON> {
-        match LookupIconIdFromDirectoryEx(resources::ICON.as_ptr() as *mut _, 1, 32, 32, LR_DEFAULTCOLOR) as isize {
+        match LookupIconIdFromDirectoryEx(
+            resources::ICON.as_ptr() as *mut _,
+            1,
+            32,
+            32,
+            LR_DEFAULTCOLOR,
+        ) as isize
+        {
             0 => utils::last_error(),
             offset => {
-                match CreateIconFromResourceEx(resources::ICON.as_ptr().offset(offset) as *mut _, resources::ICON.len() as u32, 1, 0x00030000, 0, 0, LR_DEFAULTCOLOR) {
+                match CreateIconFromResourceEx(
+                    resources::ICON.as_ptr().offset(offset) as *mut _,
+                    resources::ICON.len() as u32,
+                    1,
+                    0x00030000,
+                    0,
+                    0,
+                    LR_DEFAULTCOLOR,
+                ) {
                     v if v.is_null() => utils::last_error(),
-                    v => Ok(v)
+                    v => Ok(v),
                 }
             }
         }
@@ -39,7 +54,7 @@ impl TrayIcon {
         unsafe {
             match Shell_NotifyIconW(NIM_DELETE, &mut self.data) {
                 v if v == 0 => utils::last_error(),
-                _ => Ok(())
+                _ => Ok(()),
             }
         }
     }
@@ -48,7 +63,7 @@ impl TrayIcon {
         unsafe {
             match Shell_NotifyIconW(NIM_ADD, &mut self.data) {
                 v if v == 0 => utils::last_error(),
-                _ => Ok(())
+                _ => Ok(()),
             }
         }
     }
@@ -91,7 +106,7 @@ impl TrayIcon {
         let mut result: GUID = mem::zeroed();
         match SUCCEEDED(CoCreateGuid(&mut result)) {
             true => Ok(result),
-            false => utils::other_error("Failed to create GUID")
+            false => utils::other_error("Failed to create GUID"),
         }
     }
 
@@ -102,9 +117,10 @@ impl TrayIcon {
             IMAGE_ICON,
             0,
             0,
-            LR_DEFAULTSIZE | LR_LOADFROMFILE) {
+            LR_DEFAULTSIZE | LR_LOADFROMFILE,
+        ) {
             v if v.is_null() => utils::last_error(),
-            v => Ok(v as HICON)
+            v => Ok(v as HICON),
         }
     }
 }
@@ -119,9 +135,7 @@ pub fn on_message(event: Event) -> Action {
             println!("double click");
             ComposedAction::RestoreWindow.into()
         }
-        _ => {
-            SimpleAction::DoNothing.into()
-        }
+        _ => SimpleAction::DoNothing.into(),
     }
 }
 

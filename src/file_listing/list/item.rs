@@ -1,6 +1,6 @@
 use crate::file_listing::files::FileData;
-use twoway;
 use crate::windows::utils::ToWide;
+use twoway;
 
 #[derive(Debug)]
 pub struct DisplayItem {
@@ -50,7 +50,6 @@ fn pretty_size(bytes_size: i64) -> String {
     result
 }
 
-
 #[derive(Debug)]
 pub struct Match {
     pub matched: bool,
@@ -91,7 +90,6 @@ pub fn matches(needle: &str, haystack: &str) -> Vec<Match> {
     }
     result
 }
-
 
 #[cfg(test)]
 mod tests {

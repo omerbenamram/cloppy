@@ -8,7 +8,10 @@ pub trait ToWide {
     fn to_wide_null(&self) -> Vec<u16>;
 }
 
-impl<T> ToWide for T where T: AsRef<OsStr> {
+impl<T> ToWide for T
+where
+    T: AsRef<OsStr>,
+{
     #[inline]
     fn to_wide(&self) -> Vec<u16> {
         self.as_ref().encode_wide().collect()
@@ -19,7 +22,10 @@ impl<T> ToWide for T where T: AsRef<OsStr> {
     }
 }
 
-pub trait FromWide where Self: Sized {
+pub trait FromWide
+where
+    Self: Sized,
+{
     fn from_wide(wide: &[u16]) -> Self;
     #[inline]
     fn from_wide_null(wide: &[u16]) -> Self {
@@ -56,4 +62,3 @@ impl FromWide for PathBuf {
         <OsString as OsStringExt>::from_wide(wide).into()
     }
 }
-

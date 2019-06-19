@@ -32,19 +32,19 @@ extern crate twoway;
 extern crate typed_builder;
 extern crate winapi;
 
-use crossbeam_channel as channel;
 use crate::dispatcher::GuiDispatcher;
 use crate::dispatcher::UiAsyncMessage;
 use crate::errors::failure_to_string;
 use crate::errors::MyErrorKind::UserSettingsError;
-use failure::Error;
-use failure::ResultExt;
 use crate::gui::GuiCreateParams;
 use crate::gui::Wnd;
 use crate::plugin::Plugin;
 use crate::plugin::State;
 use crate::plugin_handler::PluginHandler;
 use crate::settings::UserSettings;
+use crossbeam_channel as channel;
+use failure::Error;
+use failure::ResultExt;
 use std::sync::Arc;
 use std::thread;
 

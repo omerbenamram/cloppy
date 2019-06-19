@@ -25,7 +25,6 @@ impl PartialOrd for FileData {
     }
 }
 
-
 impl Ord for FileData {
     fn cmp(&self, other: &FileData) -> Ordering {
         self.id.cmp(&other.id)
@@ -153,51 +152,55 @@ impl Files {
         result
     }
 
-//    fn new_search_by_name<'a>(&self, name: &'a str) -> Vec<ItemId> {
-//        println!("2");
-//        println!("total {}", self.storage.iter().count());
-//        let now = Instant::now();
-//        let total = self.storage.iter().filter(|item| twoway::find_str(item.name, name).is_some()).count();
-//        println!("new search found {} in {:?}ms", total, Instant::now().duration_since(now));
-//        self.names.par_iter().enumerate()
-//            .filter(|(_, file_name)| twoway::find_str(file_name, name).is_some())
-//            .map(|(pos, _)| FileId::new(pos as u32))
-//            .collect()
-//    }
+    //    fn new_search_by_name<'a>(&self, name: &'a str) -> Vec<ItemId> {
+    //        println!("2");
+    //        println!("total {}", self.storage.iter().count());
+    //        let now = Instant::now();
+    //        let total = self.storage.iter().filter(|item| twoway::find_str(item.name, name).is_some()).count();
+    //        println!("new search found {} in {:?}ms", total, Instant::now().duration_since(now));
+    //        self.names.par_iter().enumerate()
+    //            .filter(|(_, file_name)| twoway::find_str(file_name, name).is_some())
+    //            .map(|(pos, _)| FileId::new(pos as u32))
+    //            .collect()
+    //    }
 
-//    fn continue_search_by_name<'a>(&self, name: &'a str, prev_search: &[ItemId]) -> Vec<ItemId> {
-//        prev_search.par_iter().cloned()
-//            .filter(|pos| twoway::find_str(self.get_name_of(*pos), name).is_some())
-//            .collect()
-//    }
+    //    fn continue_search_by_name<'a>(&self, name: &'a str, prev_search: &[ItemId]) -> Vec<ItemId> {
+    //        prev_search.par_iter().cloned()
+    //            .filter(|pos| twoway::find_str(self.get_name_of(*pos), name).is_some())
+    //            .collect()
+    //    }
 
-
-    pub fn search_by_name<'a>(&self, name: &'a str, _prev_search: Option<&[FileId]>) -> Vec<FileId> {
-        self.storage.iter()
+    pub fn search_by_name<'a>(
+        &self,
+        name: &'a str,
+        _prev_search: Option<&[FileId]>,
+    ) -> Vec<FileId> {
+        self.storage
+            .iter()
             .filter(|item| twoway::find_str(item.name, name).is_some())
             .map(|i| i.data.id())
             .collect()
     }
 
-//    pub fn search_by_name<'a>(&self, name: &'a str, prev_search: Option<&[FileId]>) -> Vec<FileId> {
-//        if name.is_empty() {
-//            println!("1");
-//            self.sorted_idx.clone()
-//        } else {
-//            match prev_search {
-//                None => self.new_search_by_name(name),
-//                Some(prev) => self.continue_search_by_name(name, prev)
-//            }
-//        }
-//    }
+    //    pub fn search_by_name<'a>(&self, name: &'a str, prev_search: Option<&[FileId]>) -> Vec<FileId> {
+    //        if name.is_empty() {
+    //            println!("1");
+    //            self.sorted_idx.clone()
+    //        } else {
+    //            match prev_search {
+    //                None => self.new_search_by_name(name),
+    //                Some(prev) => self.continue_search_by_name(name, prev)
+    //            }
+    //        }
+    //    }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::file_listing::file_entity::FileId;
     use crate::ntfs::attributes::FilenameAttr;
     use crate::ntfs::file_record::FileRecord;
-    use super::*;
 
     const FILE: u16 = 1;
     const DIR: u16 = 2;
@@ -318,4 +321,3 @@ mod tests {
         assert_eq!("new_name", files.get_file(search[0]).name);
     }
 }
-

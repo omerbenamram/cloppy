@@ -2,31 +2,31 @@ use crate::actions::exit_app::exit_app;
 use crate::actions::focus_on_input_field::focus_on_input_field;
 use crate::actions::minimize_to_tray::minimize_to_tray;
 use crate::actions::new_input_query::new_input_query;
+use crate::actions::new_plugin_state::new_plugin_state;
+use crate::actions::new_settings::new_settings;
+use crate::actions::restore_columns_position::restore_columns_position;
 use crate::actions::restore_windows_position::restore_windows_position;
 use crate::actions::save_columns_position::save_columns_position;
 use crate::actions::save_windows_position::save_windows_position;
 use crate::actions::shortcuts::Shortcut;
 use crate::actions::show_files_window::show_files_window;
 use crate::errors::failure_to_string;
-use failure::Error;
 use crate::gui::event::Event;
 use crate::gui::Gui;
-use crate::actions::restore_columns_position::restore_columns_position;
-use crate::actions::new_plugin_state::new_plugin_state;
-use crate::actions::new_settings::new_settings;
+use failure::Error;
 
-pub mod shortcuts;
-mod new_input_query;
-mod save_windows_position;
-mod show_files_window;
-mod restore_windows_position;
-mod minimize_to_tray;
-mod focus_on_input_field;
 mod exit_app;
-mod save_columns_position;
-mod restore_columns_position;
+mod focus_on_input_field;
+mod minimize_to_tray;
+mod new_input_query;
 mod new_plugin_state;
 mod new_settings;
+mod restore_columns_position;
+mod restore_windows_position;
+mod save_columns_position;
+mod save_windows_position;
+pub mod shortcuts;
+mod show_files_window;
 
 #[derive(Copy, Clone, Debug)]
 pub enum Action {
@@ -69,7 +69,7 @@ pub enum SimpleAction {
     RestoreColumnsPosition,
     NewPluginState,
     NewSettings,
-//    FocusOnItemList,
+    //    FocusOnItemList,
 }
 
 impl SimpleAction {
@@ -99,8 +99,14 @@ pub enum ComposedAction {
 
 impl ComposedAction {
     pub fn simple_actions(self) -> &'static [SimpleAction] {
-        static RESTORE_WINDOW: [SimpleAction; 2] = [SimpleAction::ShowFilesWindow, SimpleAction::FocusOnInputField];
-        static RESIZE_WINDOW_FROM_SETTINGS: [SimpleAction; 2] = [SimpleAction::RestoreWindowPosition, SimpleAction::RestoreColumnsPosition];
+        static RESTORE_WINDOW: [SimpleAction; 2] = [
+            SimpleAction::ShowFilesWindow,
+            SimpleAction::FocusOnInputField,
+        ];
+        static RESIZE_WINDOW_FROM_SETTINGS: [SimpleAction; 2] = [
+            SimpleAction::RestoreWindowPosition,
+            SimpleAction::RestoreColumnsPosition,
+        ];
         match self {
             ComposedAction::RestoreWindow => &RESTORE_WINDOW,
             ComposedAction::ResizeWindowFromSettings => &RESIZE_WINDOW_FROM_SETTINGS,

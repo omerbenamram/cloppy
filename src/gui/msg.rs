@@ -1,24 +1,13 @@
+use super::utils;
+use super::wnd::Wnd;
 use crate::errors::MyErrorKind::WindowsError;
 use failure::{Error, ResultExt};
 use std::mem;
 use std::ptr;
-use super::utils;
-use super::wnd::Wnd;
-use winapi::shared::minwindef::{
-    INT,
-    LRESULT,
-};
-use winapi::shared::windef::{
-    HACCEL,
-    HWND,
-};
+use winapi::shared::minwindef::{INT, LRESULT};
+use winapi::shared::windef::{HACCEL, HWND};
 use winapi::um::winuser::{
-    DispatchMessageW,
-    GetMessageW,
-    MSG,
-    PostQuitMessage,
-    TranslateAcceleratorW,
-    TranslateMessage,
+    DispatchMessageW, GetMessageW, PostQuitMessage, TranslateAcceleratorW, TranslateMessage, MSG,
 };
 
 pub trait Msg: Sized {
@@ -36,21 +25,19 @@ impl Msg for MSG {
             let mut msg = mem::zeroed();
             match GetMessageW(&mut msg, wnd, 0, 0) {
                 -1 => utils::last_error().context(WindowsError("GetMessageW failed"))?,
-                _ => Ok(msg)
+                _ => Ok(msg),
             }
         }
     }
     fn dispatch(&self) -> LRESULT {
-        unsafe {
-            DispatchMessageW(self)
-        }
+        unsafe { DispatchMessageW(self) }
     }
 
     fn translate(&self) -> bool {
         unsafe {
             match TranslateMessage(self) {
                 0 => false,
-                _ => true
+                _ => true,
             }
         }
     }
@@ -65,8 +52,6 @@ impl Msg for MSG {
     }
 
     fn post_quit(exit_code: INT) {
-        unsafe {
-            PostQuitMessage(exit_code)
-        }
+        unsafe { PostQuitMessage(exit_code) }
     }
 }

@@ -30,7 +30,9 @@ pub trait PluginStateClone {
 }
 
 impl<T> PluginStateClone for T
-    where T: 'static + PluginState + Clone {
+where
+    T: 'static + PluginState + Clone,
+{
     fn clone_box(&self) -> Box<dyn PluginState> {
         Box::new(self.clone())
     }
@@ -49,7 +51,11 @@ impl Clone for State {
 }
 
 impl State {
-    pub fn new<T: Into<String>>(query: T, count: usize, plugin_state: Box<dyn PluginState>) -> State {
+    pub fn new<T: Into<String>>(
+        query: T,
+        count: usize,
+        plugin_state: Box<dyn PluginState>,
+    ) -> State {
         State {
             query: query.into(),
             count,
@@ -75,4 +81,3 @@ impl State {
         state.downcast_mut::<T>()
     }
 }
-

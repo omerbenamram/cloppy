@@ -1,5 +1,5 @@
-use std::io;
 use std::ffi::{OsStr, OsString};
+use std::io;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
 
 pub trait ToWide {
@@ -7,7 +7,10 @@ pub trait ToWide {
     fn to_wide_null(&self) -> Vec<u16>;
 }
 
-impl<T> ToWide for T where T: AsRef<OsStr> {
+impl<T> ToWide for T
+where
+    T: AsRef<OsStr>,
+{
     fn to_wide(&self) -> Vec<u16> {
         self.as_ref().encode_wide().collect()
     }
@@ -34,4 +37,3 @@ pub fn last_error<T>() -> io::Result<T> {
 pub fn other_error<T>(msg: &str) -> io::Result<T> {
     Err(io::Error::new(io::ErrorKind::Other, msg))
 }
-

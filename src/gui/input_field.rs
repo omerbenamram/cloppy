@@ -1,10 +1,10 @@
 use crate::errors::MyErrorKind::WindowsError;
-use failure::Error;
-use failure::ResultExt;
 use crate::gui::get_string;
-use crate::gui::INPUT_SEARCH_ID;
 use crate::gui::wnd;
 use crate::gui::Wnd;
+use crate::gui::INPUT_SEARCH_ID;
+use failure::Error;
+use failure::ResultExt;
 use winapi::shared::minwindef::*;
 use winapi::shared::windef::*;
 use winapi::um::commctrl::*;

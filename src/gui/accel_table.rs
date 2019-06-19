@@ -14,18 +14,17 @@ const ENTRIES: &'static [Entry] = &[
 ];
 
 pub fn new() -> io::Result<HACCEL> {
-    let mut vec = ENTRIES.iter().map(|entry| {
-        ACCEL {
+    let mut vec = ENTRIES
+        .iter()
+        .map(|entry| ACCEL {
             fVirt: entry.0,
             key: entry.1,
             cmd: entry.2,
-        }
-    }).collect::<Vec<_>>();
+        })
+        .collect::<Vec<_>>();
     let size = vec.len() as i32;
-    match unsafe {
-        CreateAcceleratorTableW(vec.as_mut_ptr(), size)
-    } {
+    match unsafe { CreateAcceleratorTableW(vec.as_mut_ptr(), size) } {
         v if v.is_null() => utils::other_error("CreateAcceleratorTableW failed"),
-        v => Ok(v)
+        v => Ok(v),
     }
 }

@@ -10,8 +10,8 @@ use winapi::shared::ntdef::LPCWSTR;
 use winapi::shared::windef::HDC;
 use winapi::shared::windef::RECT;
 use winapi::um::commctrl::HIMAGELIST;
-use winapi::um::shellapi::SHFILEINFOW;
 use winapi::um::shellapi::SHGetFileInfoW;
+use winapi::um::shellapi::SHFILEINFOW;
 use winapi::um::shellapi::SHGFI_ICON;
 use winapi::um::shellapi::SHGFI_SMALLICON;
 use winapi::um::shellapi::SHGFI_SYSICONINDEX;
@@ -80,7 +80,8 @@ pub fn image_index_of(str: LPCWSTR) -> (i32) {
             FILE_ATTRIBUTE_NORMAL,
             &mut info as *mut _,
             mem::size_of::<SHFILEINFOW> as u32,
-            SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
+            SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES,
+        );
         info.iIcon
     }
 }
@@ -93,7 +94,8 @@ pub fn directory_index() -> (i32) {
             FILE_ATTRIBUTE_DIRECTORY,
             &mut info as *mut _,
             mem::size_of::<SHFILEINFOW> as u32,
-            SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
+            SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES,
+        );
         info.iIcon
     }
 }
@@ -106,8 +108,13 @@ fn image_list() -> (ImageList, i32) {
             FILE_ATTRIBUTE_NORMAL,
             &mut info as *mut _,
             mem::size_of::<SHFILEINFOW> as u32,
-            SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
-        (ImageList { handle: handle as HIMAGELIST }, info.iIcon)
+            SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES,
+        );
+        (
+            ImageList {
+                handle: handle as HIMAGELIST,
+            },
+            info.iIcon,
+        )
     }
 }
-

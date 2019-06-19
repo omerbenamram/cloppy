@@ -1,4 +1,5 @@
 use crate::errors::MyErrorKind::*;
+use crate::windows::utils::FromWide;
 use failure::Error;
 use failure::Fail;
 use std::fs::File;
@@ -10,9 +11,8 @@ use winapi::shared::winerror::{ERROR_IO_PENDING, SUCCEEDED};
 use winapi::um::fileapi::ReadFile;
 use winapi::um::knownfolders::FOLDERID_RoamingAppData;
 use winapi::um::minwinbase::OVERLAPPED;
-use winapi::um::shlobj::KF_FLAG_DEFAULT;
 use winapi::um::shlobj::SHGetKnownFolderPath;
-use crate::windows::utils::FromWide;
+use winapi::um::shlobj::KF_FLAG_DEFAULT;
 
 pub mod async_io;
 pub mod utils;
@@ -27,7 +27,9 @@ pub fn locate_user_data() -> Result<PathBuf, Error> {
             &mut string,
         )) {
             true => Ok(PathBuf::from_wide_ptr_null(string)),
-            false => Err(io::Error::last_os_error().context(WindowsError("Failed to locate %APPDATA%")))?
+            false => {
+                Err(io::Error::last_os_error().context(WindowsError("Failed to locate %APPDATA%")))?
+            }
         }
     }
 }

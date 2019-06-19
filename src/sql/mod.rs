@@ -38,7 +38,7 @@ const SELECT_FILES_NEXT_PAGE: &str = "SELECT name, parent_id, real_size, id FROM
 
 pub fn main() -> Connection {
     let conn = Connection::open("test.db").unwrap();
-//    let conn = Connection::open_in_memory().unwrap();
+    //    let conn = Connection::open_in_memory().unwrap();
 
     conn.execute(CREATE_DB, params![]).unwrap();
     conn.prepare_cached(INSERT_FILE).unwrap();
@@ -90,20 +90,25 @@ pub fn insert_files(files: &[FileRecord]) {
     {
         let mut stmt = tx.prepare_cached(INSERT_FILE).unwrap();
         for file in files {
-            file.name_attrs.iter().filter(|n| n.namespace != 2).for_each(|name| {
-                stmt.execute_named(&[
-                    (":id", &file.header.fr_number),
-                    (":parent_id", &(name.parent_id as u32)),
-                    (":dos_flags", &name.dos_flags),
-                    (":real_size", &file.data_attr.size),
-                    (":name", &name.name),
-                    (":modified_date", &file.standard_attr.modified),
-                    (":created_date", &file.standard_attr.created),
-                    (":base_record", &(file.header.base_record as i64)),
-                    (":fr_number", &file.fr_number()),
-                    (":namespace", &name.namespace),
-                    (":flags", &file.header.flags)]).unwrap();
-            });
+            file.name_attrs
+                .iter()
+                .filter(|n| n.namespace != 2)
+                .for_each(|name| {
+                    stmt.execute_named(&[
+                        (":id", &file.header.fr_number),
+                        (":parent_id", &(name.parent_id as u32)),
+                        (":dos_flags", &name.dos_flags),
+                        (":real_size", &file.data_attr.size),
+                        (":name", &name.name),
+                        (":modified_date", &file.standard_attr.modified),
+                        (":created_date", &file.standard_attr.created),
+                        (":base_record", &(file.header.base_record as i64)),
+                        (":fr_number", &file.fr_number()),
+                        (":namespace", &name.namespace),
+                        (":flags", &file.header.flags),
+                    ])
+                    .unwrap();
+                });
         }
     }
     tx.commit().unwrap();
@@ -111,9 +116,13 @@ pub fn insert_files(files: &[FileRecord]) {
 
 pub fn load_all_arena() -> Result<(Files)> {
     let con = Connection::open("test.db").unwrap();
-    let count = con.query_row(SELECT_COUNT_ALL, params![], |r| r.get::<usize, u32>(0)).unwrap() as usize;
+    let count = con
+        .query_row(SELECT_COUNT_ALL, params![], |r| r.get::<usize, u32>(0))
+        .unwrap() as usize;
     let mut stmt = con.prepare(SELECT_ALL_FILES).unwrap();
-    let result = stmt.query_map(params![], FileEntity::from_file_row).unwrap();
+    let result = stmt
+        .query_map(params![], FileEntity::from_file_row)
+        .unwrap();
     let mut files = Vec::with_capacity(count);
     for file in result {
         let f: FileEntity = file?;
@@ -123,4 +132,3 @@ pub fn load_all_arena() -> Result<(Files)> {
     arena.bulk_add(files);
     Ok(arena)
 }
-

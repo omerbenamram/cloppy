@@ -1,16 +1,15 @@
-use failure::Error;
 use crate::ntfs::file_record::FileRecord;
 use crate::ntfs::mft_parser::MftParser;
 use crate::ntfs::volume_data::VolumeData;
 use crate::ntfs::windows_api::get_volume_data;
-use slog::Logger;
 use crate::sql::insert_files;
+use failure::Error;
+use slog::Logger;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::SeekFrom;
 use std::path::Path;
 use std::thread;
-
 
 fn parse_volume<P: AsRef<Path>>(logger: Logger, path: P) -> Vec<FileRecord> {
     info!(logger, "parse volume"; "status" => "started");
@@ -19,9 +18,12 @@ fn parse_volume<P: AsRef<Path>>(logger: Logger, path: P) -> Vec<FileRecord> {
     let mut parser = MftParser::new(logger.clone(), &mft, volume);
     let mut reader = parser.new_reader(path, 42);
 
-    let read_thread = thread::Builder::new().name("producer".to_string()).spawn(move || {
-        reader.read_all(&mft, volume);
-    }).unwrap();
+    let read_thread = thread::Builder::new()
+        .name("producer".to_string())
+        .spawn(move || {
+            reader.read_all(&mft, volume);
+        })
+        .unwrap();
     parser.parse_iocp_buffer();
     read_thread.join().expect("reader panic");
     info!(logger, "parse volume"; "status" => "finished", "files count"=> parser.files.len());
@@ -33,7 +35,8 @@ fn read_mft<P: AsRef<Path>>(volume_path: P) -> (FileRecord, VolumeData) {
     let volume_data = VolumeData::new(get_volume_data(&file).unwrap());
     let mut buffer = vec![0u8; volume_data.bytes_per_file_record as usize];
 
-    file.seek(SeekFrom::Start(volume_data.initial_offset())).unwrap();
+    file.seek(SeekFrom::Start(volume_data.initial_offset()))
+        .unwrap();
     file.read_exact(&mut buffer).unwrap();
     let mft = FileRecord::parse_mft_entry(&mut buffer, volume_data).unwrap();
 

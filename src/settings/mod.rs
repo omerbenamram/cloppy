@@ -1,17 +1,15 @@
 use crate::errors::MyErrorKind::*;
+use crate::windows;
 use failure::Error;
 use failure::ResultExt;
 use ini::Ini;
 use slog::Logger;
 use std::collections::HashMap;
-use std::fs::{
-    OpenOptions,
-};
+use std::fs::OpenOptions;
 use std::path::PathBuf;
 use std::str::FromStr;
 use strum::AsStaticRef;
 use strum::IntoEnumIterator;
-use crate::windows;
 
 #[derive(AsStaticStr, EnumString, EnumIter, Display, Eq, Hash, PartialEq)]
 pub enum Setting {
@@ -49,7 +47,9 @@ pub struct UserSettings {
 impl UserSettings {
     fn load_or_create(logger: &Logger, location: &PathBuf) -> Result<Ini, Error> {
         let mut file = OpenOptions::new()
-            .read(true).write(true).create(true)
+            .read(true)
+            .write(true)
+            .create(true)
             .open(location)?;
         let metadata = file.metadata()?;
         if metadata.len() == 0 {
@@ -64,14 +64,17 @@ impl UserSettings {
     }
 
     pub fn get(&self, setting: Setting) -> Result<&str, Error> {
-        self.settings.general_section()
+        self.settings
+            .general_section()
             .get(setting.as_static())
             .map(String::as_str)
             .ok_or(Err(WindowsError("Failed to locate %APPDATA%"))?)
     }
 
     pub fn get_settings(&self) -> HashMap<Setting, String> {
-        self.settings.general_section().iter()
+        self.settings
+            .general_section()
+            .iter()
             .map(|(k, v)| (Setting::from_str(&k).unwrap(), v.to_string()))
             .collect()
     }
@@ -85,16 +88,25 @@ impl UserSettings {
         conf
     }
 
-    pub fn update_settings(&mut self, mut settings: HashMap<Setting, String>) -> Result<HashMap<Setting, String>, Error> {
-        let settings_as_string = settings.drain().map(|(k, v)| (k.to_string(), v)).collect::<HashMap<String, String>>();
-        self.settings.general_section_mut().extend(settings_as_string);
+    pub fn update_settings(
+        &mut self,
+        mut settings: HashMap<Setting, String>,
+    ) -> Result<HashMap<Setting, String>, Error> {
+        let settings_as_string = settings
+            .drain()
+            .map(|(k, v)| (k.to_string(), v))
+            .collect::<HashMap<String, String>>();
+        self.settings
+            .general_section_mut()
+            .extend(settings_as_string);
         match self.settings.write_to_file(UserSettings::location()?) {
-            Ok(_) => {
-                Ok(self.settings.general_section().iter()
-                    .map(|(k, v)| (Setting::from_str(&k).unwrap(), v.to_string()))
-                    .collect())
-            }
-            Err(e) => Err(e).with_context(|e| format!("Failed to update settings: {}", e))?
+            Ok(_) => Ok(self
+                .settings
+                .general_section()
+                .iter()
+                .map(|(k, v)| (Setting::from_str(&k).unwrap(), v.to_string()))
+                .collect()),
+            Err(e) => Err(e).with_context(|e| format!("Failed to update settings: {}", e))?,
         }
     }
 
@@ -102,7 +114,11 @@ impl UserSettings {
         let logger = parent_logger.new(o!("type" =>"settings"));
         let location = UserSettings::location()?;
         let settings = UserSettings::load_or_create(&logger, &location)?;
-        Ok(UserSettings { location, settings, logger })
+        Ok(UserSettings {
+            location,
+            settings,
+            logger,
+        })
     }
 
     fn location() -> Result<PathBuf, Error> {
@@ -113,5 +129,8 @@ impl UserSettings {
 }
 
 pub fn setting_to_int(setting: Setting, settings: &HashMap<Setting, String>) -> i32 {
-    settings.get(&setting).map(|s| s.parse().expect("Setting is not an int")).expect("Setting not found")
+    settings
+        .get(&setting)
+        .map(|s| s.parse().expect("Setting is not an int"))
+        .expect("Setting not found")
 }

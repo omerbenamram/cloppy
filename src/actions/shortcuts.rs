@@ -1,17 +1,17 @@
 use crate::actions::Action;
 use crate::actions::SimpleAction;
-use failure::Error;
-use failure::ResultExt;
 use crate::gui::event::Event;
 use crate::gui::Wnd;
+use failure::Error;
+use failure::ResultExt;
 use num::FromPrimitive;
 use slog::Logger;
 use std::io;
 use winapi::shared::minwindef::WPARAM;
+use winapi::um::winuser::RegisterHotKey;
 use winapi::um::winuser::MOD_ALT;
 use winapi::um::winuser::MOD_NOREPEAT;
 use winapi::um::winuser::MOD_WIN;
-use winapi::um::winuser::RegisterHotKey;
 
 const N_KEY: u32 = 0x4E;
 
@@ -34,7 +34,7 @@ pub fn on_hotkey_event(logger: &Logger, event: Event) -> Action {
         None => {
             warn!(logger, "unknown shortcut"; "id" => id, "type" => "shortcut");
             SimpleAction::DoNothing.into()
-        },
+        }
         Some(shortcut) => {
             info!(logger, "handling shortcut"; "id" => ?shortcut, "type" => "shortcut");
             Action::from(shortcut)
@@ -44,7 +44,12 @@ pub fn on_hotkey_event(logger: &Logger, event: Event) -> Action {
 
 pub fn register_global_files(wnd: &Wnd) -> Result<(), Error> {
     unsafe {
-        match RegisterHotKey(wnd.hwnd, Shortcut::RestoreWindow as i32, (MOD_WIN | MOD_ALT | MOD_NOREPEAT) as u32, N_KEY) {
+        match RegisterHotKey(
+            wnd.hwnd,
+            Shortcut::RestoreWindow as i32,
+            (MOD_WIN | MOD_ALT | MOD_NOREPEAT) as u32,
+            N_KEY,
+        ) {
             v if v == 0 => Err(io::Error::last_os_error()).with_context(|e| {
                 let key = "WIN + ALT + N";
                 format!("Could not register key {}: {}", key, e)

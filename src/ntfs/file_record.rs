@@ -1,9 +1,6 @@
-use byteorder::{
-    ByteOrder,
-    LittleEndian,
-};
 use crate::ntfs::attributes::*;
 use crate::ntfs::volume_data::VolumeData;
+use byteorder::{ByteOrder, LittleEndian};
 
 const DOS_NAMESPACE: u8 = 2;
 
@@ -53,13 +50,15 @@ impl FileRecord {
         match file_record_header(buffer) {
             Some(header) => {
                 for (i, chunk) in header.fixup_seq.chunks(2).skip(1).enumerate() {
-                    buffer[volume_data.bytes_per_sector as usize * (i + 1) - 2] = *chunk.first().unwrap();
-                    buffer[volume_data.bytes_per_sector as usize * (i + 1) - 1] = *chunk.last().unwrap();
+                    buffer[volume_data.bytes_per_sector as usize * (i + 1) - 2] =
+                        *chunk.first().unwrap();
+                    buffer[volume_data.bytes_per_sector as usize * (i + 1) - 1] =
+                        *chunk.last().unwrap();
                 }
                 let attributes = parse_attributes(&buffer[header.attr_offset as usize..], DATA);
                 Some(FileRecord::new(attributes, header))
             }
-            _ => None
+            _ => None,
         }
     }
 
@@ -109,8 +108,18 @@ impl FileRecord {
             }
             acc
         });
-        assert!(1 >= standard_count, "Record {} got {} standard_attr", entry.fr_number() as u32, standard_count);
-        assert!(1 >= data_count, "Record {} got {} data_attr", entry.fr_number() as u32, data_count);
+        assert!(
+            1 >= standard_count,
+            "Record {} got {} standard_attr",
+            entry.fr_number() as u32,
+            standard_count
+        );
+        assert!(
+            1 >= data_count,
+            "Record {} got {} data_attr",
+            entry.fr_number() as u32,
+            data_count
+        );
         entry
     }
 }

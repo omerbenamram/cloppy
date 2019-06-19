@@ -1,8 +1,8 @@
 use crate::errors::MyErrorKind::WindowsError;
-use failure::Error;
-use failure::ResultExt;
 use crate::gui::utils;
 use crate::resources::constants::IDC_CLOPPY;
+use failure::Error;
+use failure::ResultExt;
 use std::{mem, ptr};
 use winapi::shared::minwindef::*;
 use winapi::shared::ntdef::LPCWSTR;
@@ -11,7 +11,12 @@ use winapi::um::commctrl::*;
 use winapi::um::libloaderapi::GetModuleHandleW;
 use winapi::um::winuser::*;
 
-pub type WndProcRef = unsafe extern "system" fn(wnd: HWND, message: UINT, w_param: WPARAM, l_param: LPARAM) -> LRESULT;
+pub type WndProcRef = unsafe extern "system" fn(
+    wnd: HWND,
+    message: UINT,
+    w_param: WPARAM,
+    l_param: LPARAM,
+) -> LRESULT;
 
 pub struct WndClass(pub LPCWSTR, pub HINSTANCE);
 
@@ -39,7 +44,7 @@ impl WndClass {
     unsafe fn register(wnd_class: &WNDCLASSEXW) -> Result<Self, Error> {
         match RegisterClassExW(wnd_class) {
             0 => utils::last_error().context(WindowsError("RegisterClassExW failed"))?,
-            v => Ok(WndClass(v as LPCWSTR, wnd_class.hInstance))
+            v => Ok(WndClass(v as LPCWSTR, wnd_class.hInstance)),
         }
     }
 
@@ -51,7 +56,7 @@ impl WndClass {
             };
             match InitCommonControlsEx(&controls) {
                 0 => utils::last_error().context(WindowsError("InitCommonControlsEx failed"))?,
-                _ => Ok(())
+                _ => Ok(()),
             }
         }
     }
@@ -59,8 +64,10 @@ impl WndClass {
     pub fn get_module_handle() -> Result<HMODULE, Error> {
         unsafe {
             match GetModuleHandleW(ptr::null()) {
-                v if v.is_null() => utils::last_error().context(WindowsError("GetModuleHandleW failed"))?,
-                v => Ok(v)
+                v if v.is_null() => {
+                    utils::last_error().context(WindowsError("GetModuleHandleW failed"))?
+                }
+                v => Ok(v),
             }
         }
     }

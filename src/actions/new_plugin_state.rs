@@ -1,7 +1,7 @@
-use failure::Error;
 use crate::gui::event::Event;
 use crate::gui::Gui;
 use crate::plugin::State;
+use failure::Error;
 
 pub fn new_plugin_state(event: Event, gui: &mut Gui) -> Result<(), Error> {
     let new_state: Box<State> = unsafe { Box::from_raw(event.w_param_mut()) };

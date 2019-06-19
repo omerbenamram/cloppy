@@ -1,7 +1,7 @@
-use byteorder::{ByteOrder, LittleEndian};
 use crate::errors::MyErrorKind::*;
-use failure::{Error, ResultExt};
 use crate::ntfs::windows_api::structs::*;
+use byteorder::{ByteOrder, LittleEndian};
+use failure::{Error, ResultExt};
 use std::fs::File;
 use std::io;
 use std::mem;
@@ -11,12 +11,8 @@ use winapi::ctypes::c_void;
 use winapi::shared::minwindef::BYTE;
 use winapi::um::ioapiset::DeviceIoControl;
 use winapi::um::winioctl::{
-    FSCTL_GET_NTFS_FILE_RECORD,
-    FSCTL_GET_NTFS_VOLUME_DATA,
-    FSCTL_QUERY_USN_JOURNAL,
-    FSCTL_READ_USN_JOURNAL,
-    NTFS_FILE_RECORD_INPUT_BUFFER,
-    NTFS_FILE_RECORD_OUTPUT_BUFFER,
+    FSCTL_GET_NTFS_FILE_RECORD, FSCTL_GET_NTFS_VOLUME_DATA, FSCTL_QUERY_USN_JOURNAL,
+    FSCTL_READ_USN_JOURNAL, NTFS_FILE_RECORD_INPUT_BUFFER, NTFS_FILE_RECORD_OUTPUT_BUFFER,
 };
 use winapi::um::winnt::LARGE_INTEGER;
 
@@ -42,13 +38,19 @@ pub fn get_volume_data(file: &File) -> Result<[u8; 128], Error> {
     }
 }
 
-pub fn get_file_record<'a>(v_handle: &File, fr_number: i64, buffer: &'a mut [u8]) -> Result<(&'a mut [u8]), Error> {
+pub fn get_file_record<'a>(
+    v_handle: &File,
+    fr_number: i64,
+    buffer: &'a mut [u8],
+) -> Result<(&'a mut [u8]), Error> {
     let mut bytes_read = 0;
     let buffer_size = buffer.len();
     match unsafe {
         let mut fr = mem::zeroed::<LARGE_INTEGER>();
         *fr.QuadPart_mut() = fr_number as i64;
-        let mut input = NTFS_FILE_RECORD_INPUT_BUFFER { FileReferenceNumber: fr };
+        let mut input = NTFS_FILE_RECORD_INPUT_BUFFER {
+            FileReferenceNumber: fr,
+        };
         DeviceIoControl(
             v_handle.as_raw_handle(),
             FSCTL_GET_NTFS_FILE_RECORD,
@@ -60,16 +62,23 @@ pub fn get_file_record<'a>(v_handle: &File, fr_number: i64, buffer: &'a mut [u8]
             ptr::null_mut(),
         )
     } {
-        v if v == 0 => Err(io::Error::last_os_error()).context(WindowsError("Failed to get file record"))?,
+        v if v == 0 => {
+            Err(io::Error::last_os_error()).context(WindowsError("Failed to get file record"))?
+        }
         _ => {
-            let size = mem::size_of::<NTFS_FILE_RECORD_OUTPUT_BUFFER>() - mem::size_of::<BYTE>() - 3;
+            let size =
+                mem::size_of::<NTFS_FILE_RECORD_OUTPUT_BUFFER>() - mem::size_of::<BYTE>() - 3;
             Ok(&mut buffer[size..])
         }
     }
 }
 
-
-pub fn read_usn_journal<'a>(v_handle: &File, start_at: i64, journal_id: u64, buf: &'a mut [u8]) -> Result<&'a [u8], Error> {
+pub fn read_usn_journal<'a>(
+    v_handle: &File,
+    start_at: i64,
+    journal_id: u64,
+    buf: &'a mut [u8],
+) -> Result<&'a [u8], Error> {
     let mut bytes_read = 0;
     let mut x = ReadUsnJournalDataV0::new(start_at, journal_id);
     match unsafe {
@@ -84,11 +93,12 @@ pub fn read_usn_journal<'a>(v_handle: &File, start_at: i64, journal_id: u64, buf
             ptr::null_mut(),
         )
     } {
-        v if v == 0 => Err(io::Error::last_os_error()).context(WindowsError("Failed to read usn_journal"))?,
+        v if v == 0 => {
+            Err(io::Error::last_os_error()).context(WindowsError("Failed to read usn_journal"))?
+        }
         _ => Ok(&buf[..bytes_read as usize]),
     }
 }
-
 
 pub fn get_usn_journal(v_handle: &File) -> Result<UsnJournal, Error> {
     let mut output = [0u8; 80];

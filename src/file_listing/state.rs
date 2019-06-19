@@ -11,7 +11,6 @@ pub struct FilesState {
 }
 
 impl FilesState {
-
     pub fn new(current_search: Vec<FileId>) -> FilesState {
         FilesState {
             current_search,
@@ -47,4 +46,3 @@ impl PluginState for FilesState {
         self
     }
 }
-

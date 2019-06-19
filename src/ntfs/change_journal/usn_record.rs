@@ -1,8 +1,8 @@
-use byteorder::{ByteOrder, LittleEndian};
 use crate::errors::MyErrorKind::UsnRecordVersionUnsupported;
-use failure::Error;
 use crate::ntfs::file_record::FileRecord;
 use crate::ntfs::windows_api::windows_string;
+use byteorder::{ByteOrder, LittleEndian};
+use failure::Error;
 
 #[derive(Debug, PartialEq)]
 pub enum UsnChange {
@@ -46,7 +46,7 @@ impl UsnRecord {
                 let parent_fr = LittleEndian::read_i64(&input[16..]);
                 (seq_number, fr, parent_fr)
             }
-            _ => Err(UsnRecordVersionUnsupported(version))?
+            _ => Err(UsnRecordVersionUnsupported(version))?,
         };
         let mft_id = fr_number as u32;
         let usn = LittleEndian::read_i64(&input[24..]);
@@ -55,7 +55,17 @@ impl UsnRecord {
         let name_length = LittleEndian::read_u16(&input[56..]) as usize;
         let name_offset = LittleEndian::read_u16(&input[58..]) as usize;
         let name = windows_string(&input[name_offset..name_offset + name_length]);
-        Ok(UsnRecord { mft_id, fr_number, seq_number, parent_fr_number, reason, name, flags, length, usn })
+        Ok(UsnRecord {
+            mft_id,
+            fr_number,
+            seq_number,
+            parent_fr_number,
+            reason,
+            name,
+            flags,
+            length,
+            usn,
+        })
     }
 
     pub fn into_change(self, entry: FileRecord) -> UsnChange {
@@ -93,8 +103,8 @@ impl UsnRecord {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::UsnChange::*;
+    use super::*;
 
     fn new_record(change_reason: WinUsnChanges) -> UsnRecord {
         UsnRecord {
@@ -132,7 +142,11 @@ mod tests {
         record = new_record(WinUsnChanges::RENAME_NEW_NAME | WinUsnChanges::CLOSE);
         assert_eq!(change, record.into_change(FileRecord::default()));
 
-        record = new_record(WinUsnChanges::RENAME_NEW_NAME | WinUsnChanges::BASIC_INFO_CHANGE | WinUsnChanges::CLOSE);
+        record = new_record(
+            WinUsnChanges::RENAME_NEW_NAME
+                | WinUsnChanges::BASIC_INFO_CHANGE
+                | WinUsnChanges::CLOSE,
+        );
         assert_eq!(change, record.into_change(FileRecord::default()));
     }
 
@@ -140,11 +154,17 @@ mod tests {
     fn usn_record_to_delete_file() {
         let mut record = new_record(WinUsnChanges::FILE_DELETE);
         record.mft_id = 99;
-        assert_eq!(DELETE(record.clone()), record.into_change(FileRecord::default()));
+        assert_eq!(
+            DELETE(record.clone()),
+            record.into_change(FileRecord::default())
+        );
 
         record = new_record(WinUsnChanges::FILE_DELETE | WinUsnChanges::CLOSE);
         record.mft_id = 99;
-        assert_eq!(DELETE(record.clone()), record.into_change(FileRecord::default()));
+        assert_eq!(
+            DELETE(record.clone()),
+            record.into_change(FileRecord::default())
+        );
     }
 
     #[test]
@@ -152,12 +172,18 @@ mod tests {
         let mut record = new_record(WinUsnChanges::FILE_DELETE);
         record.mft_id = 99;
         record.flags = 0x16;
-        assert_eq!(DELETE(record.clone()), record.into_change(FileRecord::default()));
+        assert_eq!(
+            DELETE(record.clone()),
+            record.into_change(FileRecord::default())
+        );
 
         record = new_record(WinUsnChanges::FILE_DELETE | WinUsnChanges::CLOSE);
         record.mft_id = 99;
         record.flags = 0x16;
-        assert_eq!(DELETE(record.clone()), record.into_change(FileRecord::default()));
+        assert_eq!(
+            DELETE(record.clone()),
+            record.into_change(FileRecord::default())
+        );
     }
 
     #[test]

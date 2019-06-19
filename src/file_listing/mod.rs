@@ -1,11 +1,9 @@
-use crossbeam_channel as channel;
 use crate::dispatcher::UiAsyncMessage;
-use failure::Error;
 use crate::file_listing::files::Files;
-use crate::file_listing::FilesMsg::ChangeJournal;
 use crate::file_listing::list::item::DisplayItem;
 use crate::file_listing::list::paint::ItemPaint;
 use crate::file_listing::state::FilesState;
+use crate::file_listing::FilesMsg::ChangeJournal;
 use crate::gui::event::Event;
 use crate::ntfs::change_journal;
 use crate::ntfs::change_journal::UsnChange;
@@ -14,16 +12,18 @@ use crate::plugin::DrawResult;
 use crate::plugin::Plugin;
 use crate::plugin::PluginState;
 use crate::plugin::State;
+use crossbeam_channel as channel;
+use failure::Error;
 use slog::Logger;
 use std::sync::RwLock;
 use std::thread;
 use std::time::Instant;
 
-mod list;
-mod storage;
-mod state;
 pub mod file_entity;
 pub mod files;
+mod list;
+mod state;
+mod storage;
 
 pub struct FileListing(RwLock<Inner>);
 
@@ -36,7 +36,11 @@ struct Inner {
 unsafe impl Sync for Inner {}
 
 impl FileListing {
-    pub fn create(files: Files, sender: channel::Sender<UiAsyncMessage>, parent_logger: &Logger) -> Self {
+    pub fn create(
+        files: Files,
+        sender: channel::Sender<UiAsyncMessage>,
+        parent_logger: &Logger,
+    ) -> Self {
         let logger = parent_logger.new(o!("type" =>"files"));
         let item_paint = ItemPaint::create();
         run_change_journal(sender).unwrap();
@@ -89,22 +93,26 @@ impl Plugin for FileListing {
         let query = state.query().to_string();
         let inner = self.0.read().unwrap();
         let plugin_state = state.plugin_state_mut::<FilesState>().unwrap();
-        let file = plugin_state.file_in_current_search(item_id)
+        let file = plugin_state
+            .file_in_current_search(item_id)
             .map(|file_id| inner.files.get_file(file_id))
             .unwrap();
         let path = inner.files.path_of(file.data);
-        plugin_state.item_cache_mut().insert(item_id as u32, DisplayItem::new(file.data, file.name.to_string(), path, &query));
+        plugin_state.item_cache_mut().insert(
+            item_id as u32,
+            DisplayItem::new(file.data, file.name.to_string(), path, &query),
+        );
     }
 
     fn handle_message(&self, msg: &str, _prev_state: &State) -> State {
         let now = Instant::now();
         let inner = self.0.read().unwrap();
         let items = {
-//            if !inner.last_search.is_empty() && msg.starts_with(&inner.last_search) {
-//                inner.files.search_by_name(&msg, Some(&inner.items_current_search))
-//            } else {
+            //            if !inner.last_search.is_empty() && msg.starts_with(&inner.last_search) {
+            //                inner.files.search_by_name(&msg, Some(&inner.items_current_search))
+            //            } else {
             inner.files.search_by_name(msg, None)
-//            }
+            //            }
         };
         let count = items.len();
         let files_state = Box::new(FilesState::new(items));
@@ -123,13 +131,15 @@ fn millis_since(before: Instant) -> u32 {
 }
 
 pub fn run_change_journal(sender: channel::Sender<UiAsyncMessage>) -> Result<(), Error> {
-    thread::Builder::new().name("read journal".to_string()).spawn(move || {
-        let volume_path = "\\\\.\\C:";
-        let mut journal = change_journal::UsnJournal::new(volume_path).unwrap();
-        loop {
-            let changes = journal.get_new_changes().unwrap();
-            sender.send(UiAsyncMessage::Files(FilesMsg::ChangeJournal(changes)));
-        }
-    })?;
+    thread::Builder::new()
+        .name("read journal".to_string())
+        .spawn(move || {
+            let volume_path = "\\\\.\\C:";
+            let mut journal = change_journal::UsnJournal::new(volume_path).unwrap();
+            loop {
+                let changes = journal.get_new_changes().unwrap();
+                sender.send(UiAsyncMessage::Files(FilesMsg::ChangeJournal(changes)));
+            }
+        })?;
     Ok(())
 }

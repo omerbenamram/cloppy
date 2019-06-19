@@ -1,11 +1,10 @@
-use crate::actions::*;
 use crate::actions::shortcuts::on_hotkey_event;
 use crate::actions::shortcuts::register_global_files;
 use crate::actions::SimpleAction;
+use crate::actions::*;
 use crate::dispatcher::GuiDispatcher;
 use crate::dispatcher::UiAsyncMessage;
 
-use failure::Error;
 use crate::gui::event::Event;
 use crate::gui::input_field::InputSearch;
 use crate::gui::layout_manager::LayoutManager;
@@ -14,6 +13,7 @@ use crate::gui::msg::Msg;
 use crate::gui::status_bar::StatusBar;
 use crate::gui::utils::ToWide;
 use crate::gui::wnd_proc::wnd_proc;
+use failure::Error;
 use parking_lot::Mutex;
 
 pub use self::wnd::Wnd;
@@ -27,27 +27,26 @@ use winapi::shared::minwindef::TRUE;
 use winapi::shared::ntdef::LPCWSTR;
 use winapi::um::commctrl::*;
 use winapi::um::objbase::CoInitialize;
-use winapi::um::winuser::*;
 use winapi::um::winuser::WM_APP;
+use winapi::um::winuser::*;
 
+mod accel_table;
+pub mod default_font;
+pub mod event;
+pub mod image_list;
+mod input_field;
+mod layout_manager;
+mod list_header;
+pub mod list_view;
+pub mod msg;
+mod status_bar;
+mod tray_icon;
 mod utils;
 mod wnd;
-pub mod image_list;
 mod wnd_class;
-pub mod msg;
-mod tray_icon;
-pub mod list_view;
-mod input_field;
-mod status_bar;
 mod wnd_proc;
-pub mod default_font;
-mod accel_table;
-mod layout_manager;
-pub mod event;
-mod list_header;
 
 type WndId = i32;
-
 
 const STATUS_BAR_ID: WndId = 1;
 const INPUT_SEARCH_ID: WndId = 2;
@@ -64,26 +63,28 @@ pub const STATUS_BAR_CONTENT: &str = "SB_CONTENT";
 
 lazy_static! {
     pub static ref HASHMAP: Mutex<HashMap<&'static str, Vec<u16>>> = {
-    let mut m = HashMap::new();
-    m.insert("file_name", "file_name".to_wide_null());
-    m.insert("", "".to_wide_null());
-    m.insert("file_path", "file_path".to_wide_null());
-    m.insert("file_size", "file_size".to_wide_null());
-    m.insert("file", "file".to_wide_null());
-    m.insert(FILE_LIST_NAME, FILE_LIST_NAME.to_wide_null());
-    m.insert(INPUT_TEXT, INPUT_TEXT.to_wide_null());
-    m.insert(MAIN_WND_NAME, MAIN_WND_NAME.to_wide_null());
-    m.insert(MAIN_WND_CLASS, MAIN_WND_CLASS.to_wide_null());
-    m.insert(STATUSCLASSNAME, STATUSCLASSNAME.to_wide_null());
-    m.insert(STATUS_BAR, STATUS_BAR.to_wide_null());
-    m.insert(WC_EDIT, WC_EDIT.to_wide_null());
-    m.insert(WC_LISTVIEW, WC_LISTVIEW.to_wide_null());
+        let mut m = HashMap::new();
+        m.insert("file_name", "file_name".to_wide_null());
+        m.insert("", "".to_wide_null());
+        m.insert("file_path", "file_path".to_wide_null());
+        m.insert("file_size", "file_size".to_wide_null());
+        m.insert("file", "file".to_wide_null());
+        m.insert(FILE_LIST_NAME, FILE_LIST_NAME.to_wide_null());
+        m.insert(INPUT_TEXT, INPUT_TEXT.to_wide_null());
+        m.insert(MAIN_WND_NAME, MAIN_WND_NAME.to_wide_null());
+        m.insert(MAIN_WND_CLASS, MAIN_WND_CLASS.to_wide_null());
+        m.insert(STATUSCLASSNAME, STATUSCLASSNAME.to_wide_null());
+        m.insert(STATUS_BAR, STATUS_BAR.to_wide_null());
+        m.insert(WC_EDIT, WC_EDIT.to_wide_null());
+        m.insert(WC_LISTVIEW, WC_LISTVIEW.to_wide_null());
         Mutex::new(m)
     };
 }
 
 pub fn get_string(str: &str) -> LPCWSTR {
-    HASHMAP.lock().get(str)
+    HASHMAP
+        .lock()
+        .get(str)
         .unwrap_or_else(|| panic!("get_string - {} not present", str))
         .as_ptr() as LPCWSTR
 }
@@ -96,7 +97,9 @@ pub fn init_wingui(gui_params: GuiCreateParams) -> Result<i32, Error> {
     let res = unsafe { IsGUIThread(TRUE) };
     assert_ne!(res, 0);
     wnd_class::WndClass::init_commctrl()?;
-    unsafe { CoInitialize(ptr::null_mut()); }
+    unsafe {
+        CoInitialize(ptr::null_mut());
+    }
     let class = wnd_class::WndClass::new(get_string(MAIN_WND_CLASS), wnd_proc)?;
     let accel = accel_table::new()?;
 
@@ -114,7 +117,11 @@ pub fn init_wingui(gui_params: GuiCreateParams) -> Result<i32, Error> {
     icon.set_visible()?;
     loop {
         match MSG::get(None)? {
-            MSG { message: WM_QUIT, wParam: code, .. } => {
+            MSG {
+                message: WM_QUIT,
+                wParam: code,
+                ..
+            } => {
                 return Ok(code as i32);
             }
             mut msg => {
@@ -146,7 +153,13 @@ pub struct Gui {
 }
 
 impl Gui {
-    pub fn create(e: Event, instance: Option<HINSTANCE>, dispatcher: Box<GuiDispatcher>, logger: Logger, settings: HashMap<Setting, String>) -> Result<Gui, Error> {
+    pub fn create(
+        e: Event,
+        instance: Option<HINSTANCE>,
+        dispatcher: Box<GuiDispatcher>,
+        logger: Logger,
+        settings: HashMap<Setting, String>,
+    ) -> Result<Gui, Error> {
         let input_search = input_field::new(e.wnd(), instance)?;
         let status_bar = status_bar::new(e.wnd(), instance)?;
 
@@ -166,8 +179,10 @@ impl Gui {
         gui.layout_manager.initial(&gui);
         default_font::set_font_on_children(&gui.wnd)?;
 
-        gui.dispatcher.send_async_msg(UiAsyncMessage::Start(gui.wnd.clone()));
-        gui.dispatcher.send_async_msg(UiAsyncMessage::Ui("".to_string()));
+        gui.dispatcher
+            .send_async_msg(UiAsyncMessage::Start(gui.wnd.clone()));
+        gui.dispatcher
+            .send_async_msg(UiAsyncMessage::Ui("".to_string()));
 
         Ok(gui)
     }

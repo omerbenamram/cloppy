@@ -14,7 +14,11 @@ pub struct Event {
 impl Event {
     pub fn new(wnd: HWND, l_param: LPARAM, w_param: WPARAM) -> Event {
         let wnd = Wnd { hwnd: wnd };
-        Event { wnd, l_param, w_param }
+        Event {
+            wnd,
+            l_param,
+            w_param,
+        }
     }
 
     pub fn wnd(&self) -> Wnd {
@@ -49,4 +53,3 @@ impl Event {
         self.w_param as *mut T
     }
 }
-

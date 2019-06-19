@@ -1,9 +1,7 @@
 use crate::errors::MyErrorKind::WindowsError;
+use crate::windows::read_overlapped;
 use failure::{Error, ResultExt};
-use std::fs::{
-    File,
-    OpenOptions,
-};
+use std::fs::{File, OpenOptions};
 use std::io;
 use std::mem;
 use std::os::windows::fs::OpenOptionsExt;
@@ -12,24 +10,15 @@ use std::path::Path;
 use std::ptr;
 use std::slice;
 use winapi::shared::basetsd::ULONG_PTR;
-use winapi::um::handleapi::{
-    CloseHandle,
-    INVALID_HANDLE_VALUE,
-};
+use winapi::um::handleapi::{CloseHandle, INVALID_HANDLE_VALUE};
 use winapi::um::ioapiset::{
-    CreateIoCompletionPort,
-    GetQueuedCompletionStatus,
-    GetQueuedCompletionStatusEx,
+    CreateIoCompletionPort, GetQueuedCompletionStatus, GetQueuedCompletionStatusEx,
     PostQueuedCompletionStatus,
 };
-use winapi::um::minwinbase::{
-    OVERLAPPED,
-    OVERLAPPED_ENTRY,
-};
+use winapi::um::minwinbase::{OVERLAPPED, OVERLAPPED_ENTRY};
 use winapi::um::winbase::FILE_FLAG_OVERLAPPED;
 use winapi::um::winbase::INFINITE;
 use winapi::um::winnt::HANDLE;
-use crate::windows::read_overlapped;
 
 unsafe impl Send for IOCompletionPort {}
 
@@ -114,30 +103,35 @@ impl IOCompletionPort {
 
     pub fn new(threads: u32) -> Result<Self, Error> {
         unsafe {
-            match CreateIoCompletionPort(
-                INVALID_HANDLE_VALUE,
-                ptr::null_mut(),
-                0,
-                threads,
-            ) {
-                v if v.is_null() => Err(io::Error::last_os_error()).context(WindowsError("CreateIoCompletionPort -creation failed"))?,
-                v => Ok(IOCompletionPort(v))
+            match CreateIoCompletionPort(INVALID_HANDLE_VALUE, ptr::null_mut(), 0, threads) {
+                v if v.is_null() => Err(io::Error::last_os_error())
+                    .context(WindowsError("CreateIoCompletionPort -creation failed"))?,
+                v => Ok(IOCompletionPort(v)),
             }
         }
     }
 
-    pub fn associate_file<P: AsRef<Path>>(&self, file_path: P, completion_key: usize) -> Result<AsyncFile, Error> {
-        let file = OpenOptions::new().read(true).custom_flags(FILE_FLAG_OVERLAPPED).open(file_path)
-            .map(|file| AsyncFile { file, completion_key }).unwrap();
+    pub fn associate_file<P: AsRef<Path>>(
+        &self,
+        file_path: P,
+        completion_key: usize,
+    ) -> Result<AsyncFile, Error> {
+        let file = OpenOptions::new()
+            .read(true)
+            .custom_flags(FILE_FLAG_OVERLAPPED)
+            .open(file_path)
+            .map(|file| AsyncFile {
+                file,
+                completion_key,
+            })
+            .unwrap();
         unsafe {
-            match CreateIoCompletionPort(
-                file.file.as_raw_handle(),
-                self.0,
-                file.completion_key,
-                0,
-            ) {
-                v if v.is_null() => Err(io::Error::last_os_error()).context(WindowsError("CreateIoCompletionPort - associating a file failed"))?,
-                _ => Ok(file)
+            match CreateIoCompletionPort(file.file.as_raw_handle(), self.0, file.completion_key, 0)
+            {
+                v if v.is_null() => Err(io::Error::last_os_error()).context(WindowsError(
+                    "CreateIoCompletionPort - associating a file failed",
+                ))?,
+                _ => Ok(file),
             }
         }
     }
@@ -145,14 +139,11 @@ impl IOCompletionPort {
     pub fn post(&self, operation: Box<InputOperation>, completion_key: usize) -> Result<(), Error> {
         let lp_overlapped = Box::into_raw(operation) as *mut _;
         unsafe {
-            match PostQueuedCompletionStatus(
-                self.0,
-                0,
-                completion_key as ULONG_PTR,
-                lp_overlapped,
-            ) {
-                v if v == 0 => Err(io::Error::last_os_error()).context(WindowsError("PostQueuedCompletionStatus failed"))?,
-                _ => Ok(())
+            match PostQueuedCompletionStatus(self.0, 0, completion_key as ULONG_PTR, lp_overlapped)
+            {
+                v if v == 0 => Err(io::Error::last_os_error())
+                    .context(WindowsError("PostQueuedCompletionStatus failed"))?,
+                _ => Ok(()),
             }
         }
     }
@@ -169,21 +160,23 @@ impl IOCompletionPort {
                 &mut overlapped,
                 INFINITE,
             ) {
-                v if v == 0 => Err(io::Error::last_os_error()).context(WindowsError("GetQueuedCompletionStatus failed"))?,
-                _ => {
-                    Ok(OutputOperation(OVERLAPPED_ENTRY {
-                        dwNumberOfBytesTransferred: bytes_read,
-                        lpCompletionKey: completion_key,
-                        lpOverlapped: overlapped,
-                        Internal: 0,
-                    }))
-                }
+                v if v == 0 => Err(io::Error::last_os_error())
+                    .context(WindowsError("GetQueuedCompletionStatus failed"))?,
+                _ => Ok(OutputOperation(OVERLAPPED_ENTRY {
+                    dwNumberOfBytesTransferred: bytes_read,
+                    lpCompletionKey: completion_key,
+                    lpOverlapped: overlapped,
+                    Internal: 0,
+                })),
             }
         }
     }
 
     #[allow(dead_code)]
-    pub fn get_many<'a>(&self, operations: &'a mut [OutputOperation]) -> Result<&'a mut [OutputOperation], Error> {
+    pub fn get_many<'a>(
+        &self,
+        operations: &'a mut [OutputOperation],
+    ) -> Result<&'a mut [OutputOperation], Error> {
         let mut count = 0;
         let len = operations.len() as u32;
         match unsafe {
@@ -196,10 +189,9 @@ impl IOCompletionPort {
                 0,
             )
         } {
-            v if v == 0 => Err(io::Error::last_os_error()).context(WindowsError("GetQueuedCompletionStatusEx failed"))?,
-            _ => {
-                Ok(&mut operations[..count as usize])
-            }
+            v if v == 0 => Err(io::Error::last_os_error())
+                .context(WindowsError("GetQueuedCompletionStatusEx failed"))?,
+            _ => Ok(&mut operations[..count as usize]),
         }
     }
 }
@@ -212,11 +204,11 @@ impl Drop for IOCompletionPort {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use std::env;
     use std::fs::File;
     use std::io::Write;
     use std::path::PathBuf;
-    use super::*;
 
     fn temp_file() -> PathBuf {
         let mut dir = env::temp_dir();
@@ -240,7 +232,10 @@ mod tests {
         let bytes_read = output_operation.0.dwNumberOfBytesTransferred as usize;
 
         assert_eq!(bytes_read, "hello world".as_bytes().len());
-        assert_eq!(&output_operation.into_buffer()[..bytes_read], "hello world".as_bytes());
+        assert_eq!(
+            &output_operation.into_buffer()[..bytes_read],
+            "hello world".as_bytes()
+        );
     }
 
     #[test]

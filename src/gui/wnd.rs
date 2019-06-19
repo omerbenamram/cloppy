@@ -1,21 +1,17 @@
 use crate::errors::MyErrorKind::WindowsError;
-use failure::Error;
-use failure::ResultExt;
 use crate::gui::utils;
 use crate::gui::wnd_class;
-use std::{io, mem, ptr};
+use crate::windows::utils::FromWide;
+use failure::Error;
+use failure::ResultExt;
 use std::ffi::OsString;
+use std::{io, mem, ptr};
 use winapi::shared::minwindef::*;
 use winapi::shared::ntdef::LPCWSTR;
-use winapi::shared::windef::{
-    HMENU,
-    HWND,
-    RECT,
-};
+use winapi::shared::windef::{HMENU, HWND, RECT};
 use winapi::shared::winerror::ERROR_SUCCESS;
 use winapi::um::commctrl::GetEffectiveClientRect;
 use winapi::um::winuser::*;
-use crate::windows::utils::FromWide;
 
 #[derive(Copy, Clone)]
 pub struct Wnd {
@@ -28,7 +24,7 @@ impl Wnd {
     pub fn new(params: WndParams) -> Result<Self, Error> {
         let instance = match params.instance {
             Some(instance) => instance,
-            None => wnd_class::WndClass::get_module_handle()?
+            None => wnd_class::WndClass::get_module_handle()?,
         };
         unsafe {
             match CreateWindowExW(
@@ -45,7 +41,9 @@ impl Wnd {
                 instance,
                 params.lp_param,
             ) {
-                v if v.is_null() => utils::last_error().context(WindowsError("CreateWindowExW failed"))?,
+                v if v.is_null() => {
+                    utils::last_error().context(WindowsError("CreateWindowExW failed"))?
+                }
                 v => Ok(Wnd { hwnd: v }),
             }
         }
@@ -58,17 +56,13 @@ impl Wnd {
     }
 
     pub fn send_message(&self, message: u32, w_param: WPARAM, l_param: LPARAM) -> LRESULT {
-        unsafe {
-            SendMessageW(self.hwnd, message, w_param, l_param)
-        }
+        unsafe { SendMessageW(self.hwnd, message, w_param, l_param) }
     }
 
     pub fn set_position(&self, x: i32, y: i32, cx: i32, cy: i32, flags: u32) -> Result<(), Error> {
-        match unsafe {
-            SetWindowPos(self.hwnd, ptr::null_mut(), x, y, cx, cy, flags)
-        } {
+        match unsafe { SetWindowPos(self.hwnd, ptr::null_mut(), x, y, cx, cy, flags) } {
             0 => Err(io::Error::last_os_error()).context(WindowsError("SetWindowPos failed"))?,
-            _ => Ok(())
+            _ => Ok(()),
         }
     }
 
@@ -86,27 +80,28 @@ impl Wnd {
         unsafe {
             let mut rect = mem::zeroed::<RECT>();
             match GetWindowRect(self.hwnd, &mut rect) {
-                0 => Err(io::Error::last_os_error()).context(WindowsError("GetWindowRect failed"))?,
-                _ => Ok(rect)
+                0 => {
+                    Err(io::Error::last_os_error()).context(WindowsError("GetWindowRect failed"))?
+                }
+                _ => Ok(rect),
             }
         }
     }
 
     pub fn set_focus(&self) -> Result<(), Error> {
-        match unsafe {
-            SetFocus(self.hwnd)
-        } {
-            v if v.is_null() => Err(io::Error::last_os_error()).context(WindowsError("SetFocus failed"))?,
-            _ => Ok(())
+        match unsafe { SetFocus(self.hwnd) } {
+            v if v.is_null() => {
+                Err(io::Error::last_os_error()).context(WindowsError("SetFocus failed"))?
+            }
+            _ => Ok(()),
         }
     }
 
     pub fn set_as_foreground(&self) -> Result<(), Error> {
-        match unsafe {
-            SetForegroundWindow(self.hwnd)
-        } {
-            0 => Err(io::Error::last_os_error()).context(WindowsError("SetForegroundWindow failed"))?,
-            _ => Ok(())
+        match unsafe { SetForegroundWindow(self.hwnd) } {
+            0 => Err(io::Error::last_os_error())
+                .context(WindowsError("SetForegroundWindow failed"))?,
+            _ => Ok(()),
         }
     }
 
@@ -119,14 +114,12 @@ impl Wnd {
     }
 
     pub fn show(&self, mode: INT) -> Result<(), Error> {
-        match unsafe {
-            ShowWindow(self.hwnd, mode)
-        } {
+        match unsafe { ShowWindow(self.hwnd, mode) } {
             0 => match io::Error::last_os_error() {
                 ref e if e.raw_os_error() == Some(ERROR_SUCCESS as i32) => Ok(()),
                 e => Err(e).context(WindowsError("ShowWindow failed"))?,
             },
-            _ => Ok(())
+            _ => Ok(()),
         }
     }
 
@@ -134,36 +127,33 @@ impl Wnd {
         unsafe {
             match UpdateWindow(self.hwnd) {
                 0 => utils::last_error(),
-                _ => Ok(())
+                _ => Ok(()),
             }
         }
     }
 
     pub fn get_text_length(&self) -> Result<i32, Error> {
         //empty string length = 1 -> it includes the \0 terminator
-        match unsafe {
-            GetWindowTextLengthW(self.hwnd)
-        } {
+        match unsafe { GetWindowTextLengthW(self.hwnd) } {
             0 => match io::Error::last_os_error() {
                 ref e if e.raw_os_error() == Some(ERROR_SUCCESS as i32) => Ok(1),
                 e => Err(e).context(WindowsError("GetWindowTextLengthW failed"))?,
             },
-            v => Ok(v + 1)
+            v => Ok(v + 1),
         }
     }
 
     pub fn get_text(&self) -> Result<String, Error> {
         //empty string length = 1 -> it includes the \0 terminator
         let mut buffer = vec![0u16; self.get_text_length()? as usize];
-        let read: Result<i32, Error> = match unsafe {
-            GetWindowTextW(self.hwnd, buffer.as_mut_ptr(), buffer.len() as i32)
-        } {
-            0 => match io::Error::last_os_error() {
-                ref e if e.raw_os_error() == Some(ERROR_SUCCESS as i32) => Ok(1),
-                e => Err(e).context(WindowsError("GetWindowTextW failed"))?,
-            },
-            v => Ok(v + 1)
-        };
+        let read: Result<i32, Error> =
+            match unsafe { GetWindowTextW(self.hwnd, buffer.as_mut_ptr(), buffer.len() as i32) } {
+                0 => match io::Error::last_os_error() {
+                    ref e if e.raw_os_error() == Some(ERROR_SUCCESS as i32) => Ok(1),
+                    e => Err(e).context(WindowsError("GetWindowTextW failed"))?,
+                },
+                v => Ok(v + 1),
+            };
         assert_eq!(buffer.len() as i32, read?);
         OsString::from_wide_null(&buffer)
             .to_str()
@@ -197,4 +187,3 @@ pub struct WndParams {
     #[default = "0"]
     y: INT,
 }
-

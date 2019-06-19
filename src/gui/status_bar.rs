@@ -1,14 +1,14 @@
 use crate::errors::MyErrorKind::WindowsError;
-use failure::Error;
-use failure::ResultExt;
 use crate::gui::get_string;
 use crate::gui::set_string;
+use crate::gui::wnd::Wnd;
+use crate::gui::wnd::WndParams;
 use crate::gui::STATUS_BAR;
 use crate::gui::STATUS_BAR_CONTENT;
 use crate::gui::STATUS_BAR_ID;
-use crate::gui::wnd::Wnd;
-use crate::gui::wnd::WndParams;
 use crate::plugin::State;
+use failure::Error;
+use failure::ResultExt;
 use std::io;
 use winapi::shared::minwindef::HINSTANCE;
 use winapi::shared::minwindef::LPARAM;
@@ -16,7 +16,6 @@ use winapi::shared::minwindef::WPARAM;
 use winapi::shared::windef::*;
 use winapi::um::commctrl::*;
 use winapi::um::winuser::*;
-
 
 pub fn new(parent: Wnd, instance: Option<HINSTANCE>) -> Result<Wnd, Error> {
     let status_bar_params = WndParams::builder()
@@ -47,7 +46,11 @@ impl StatusBar {
         let msg = state.count().to_string() + " objects found";
         set_string(STATUS_BAR_CONTENT, msg.to_string());
         let w_param = (SB_SIMPLEID & (0 << 8)) as WPARAM;
-        match self.wnd.send_message(SB_SETTEXTW, w_param, get_string(STATUS_BAR_CONTENT) as LPARAM) {
+        match self.wnd.send_message(
+            SB_SETTEXTW,
+            w_param,
+            get_string(STATUS_BAR_CONTENT) as LPARAM,
+        ) {
             0 => Err(io::Error::last_os_error()).context(WindowsError("SB_SETTEXTW failed"))?,
             _ => Ok(()),
         }

@@ -30,14 +30,18 @@ impl Storage {
     }
 
     pub fn bulk_insert(&mut self, files: Vec<FileEntity>) {
-        let names = files.iter().map(|f| f.name().to_string()).collect::<BTreeSet<String>>();
+        let names = files
+            .iter()
+            .map(|f| f.name().to_string())
+            .collect::<BTreeSet<String>>();
         {
             let mut names_idx: HashMap<&str, u32> = HashMap::new();
 
             for (pos, name) in names.iter().enumerate() {
                 names_idx.insert(name, pos as u32);
             }
-            let mut files = files.into_iter()
+            let mut files = files
+                .into_iter()
                 .map(|f| {
                     let name_id = names_idx.get(f.name()).unwrap();
                     let mut data: FileData = f.into();
@@ -59,7 +63,8 @@ impl Storage {
     }
 
     fn update_file_name_ids(&mut self, new_name_id: NameId) {
-        self.file_data.iter_mut()
+        self.file_data
+            .iter_mut()
             .chain(self.dir_data.iter_mut())
             .filter(|f| f.name_id().0 >= new_name_id.0)
             .for_each(|f| {
@@ -93,9 +98,7 @@ impl Storage {
                 let old_data = files.get_mut(pos).unwrap();
                 mem::replace(old_data, data);
             }
-            Err(pos) => {
-                files.insert(pos, data)
-            }
+            Err(pos) => files.insert(pos, data),
         };
     }
 
@@ -118,10 +121,7 @@ impl Storage {
         let pos = files.binary_search_by_key(id.borrow(), |f| f.id()).unwrap();
         let data = files.get(pos).unwrap();
         let name = self.names.get(data.name_id().0 as usize).unwrap();
-        StorageItem {
-            data,
-            name,
-        }
+        StorageItem { data, name }
     }
 
     pub fn iter(&self) -> StorageIter {
@@ -149,19 +149,17 @@ impl<'a> Iterator for StorageIter<'a> {
     type Item = StorageItem<'a>;
 
     fn next(&mut self) -> Option<StorageItem<'a>> {
-        self.inner.next().map(|data| {
-            StorageItem {
-                name: self.names.get(data.name_id().0 as usize).unwrap(),
-                data,
-            }
+        self.inner.next().map(|data| StorageItem {
+            name: self.names.get(data.name_id().0 as usize).unwrap(),
+            data,
         })
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::file_listing::file_entity::FileId;
     use super::*;
+    use crate::file_listing::file_entity::FileId;
 
     const FILE: u16 = 1;
     const DIR: u16 = 2;
@@ -202,7 +200,10 @@ mod tests {
     fn can_update_file_and_name() {
         let mut storage = test_data();
 
-        storage.upsert(FileData::new(FileId::file(2), FileId::directory(1), 25, FILE, false), "new_file2");
+        storage.upsert(
+            FileData::new(FileId::file(2), FileId::directory(1), 25, FILE, false),
+            "new_file2",
+        );
 
         let StorageItem { name, data } = storage.get(FileId::file(2));
         assert_eq!(name, "new_file2");
@@ -247,7 +248,11 @@ mod tests {
     fn iterates_first_over_dirs() {
         let storage = test_data();
 
-        let dirs = storage.iter().take(4).filter(|i| i.data.is_directory()).count();
+        let dirs = storage
+            .iter()
+            .take(4)
+            .filter(|i| i.data.is_directory())
+            .count();
         assert_eq!(4, dirs);
     }
 
@@ -286,7 +291,6 @@ mod tests {
         assert_eq!(25, storage.get(FileId::file(1)).data.size());
         assert!(storage.get(FileId::file(1)).data.deleted());
     }
-
 
     #[test]
     fn update_file_data_new_existing_name() {

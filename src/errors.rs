@@ -1,10 +1,5 @@
+use failure::{Backtrace, Context, Error, Fail};
 use std::fmt::{self, Display};
-use failure::{
-    Backtrace,
-    Context,
-    Error,
-    Fail,
-};
 
 #[derive(Debug)]
 struct MyError {
@@ -48,7 +43,9 @@ impl MyError {
 
 impl From<MyErrorKind> for MyError {
     fn from(kind: MyErrorKind) -> MyError {
-        MyError { inner: Context::new(kind) }
+        MyError {
+            inner: Context::new(kind),
+        }
     }
 }
 
