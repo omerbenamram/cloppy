@@ -8,7 +8,7 @@ pub const ID_FILL_LIST: u16 = 0x8001;
 
 type Entry = (u8, u16, u16);
 
-const ENTRIES: &'static [Entry] = &[
+const ENTRIES: &[Entry] = &[
     ((FCONTROL | FVIRTKEY), 0x41, ID_SELECT_ALL),
     ((FCONTROL | FVIRTKEY), 0x42, ID_FILL_LIST),
 ];

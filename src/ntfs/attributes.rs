@@ -3,7 +3,7 @@ use byteorder::{ByteOrder, LittleEndian, ReadBytesExt};
 use std::io::Cursor;
 
 const DATARUN_END: u8 = 0x00;
-const END1: u32 = 0xFFFFFFFF;
+const END1: u32 = 0xFFFF_FFFF;
 const STANDARD: u32 = 0x10;
 pub const FILENAME: u32 = 0x30;
 pub const DATA: u32 = 0x80;
@@ -47,8 +47,8 @@ pub struct Datarun {
     pub offset_lcn: i64,
 }
 
-const SEC_TO_UNIX_EPOCH: i64 = 11644473600;
-const WINDOWS_TICK: i64 = 10000000;
+const SEC_TO_UNIX_EPOCH: i64 = 11_644_473_600;
+const WINDOWS_TICK: i64 = 10_000_000;
 
 fn win_to_unix_time(win32time: i64) -> i64 {
     win32time / WINDOWS_TICK - SEC_TO_UNIX_EPOCH
@@ -221,7 +221,7 @@ mod tests {
             0, 32, 0, 0, 0, 36, 0, 73, 0, 51, 0, 48, 0, 31, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255,
             255, 130, 121, 71, 17,
         ];
-        println!("{}", 3096224744371802u64 as u32);
+        println!("{}", 3_096_224_744_371_802u64 as u32);
         println!("{:?}", parse_attributes(&input, DATA));
     }
 
@@ -229,11 +229,11 @@ mod tests {
     fn test_length_in_lcn() {
         assert_eq!(0xAA, length_in_lcn(&[0xAA]));
         assert_eq!(
-            0xAABBCCDD11223344,
+            0xAABB_CCDD_1122_3344,
             length_in_lcn(&[0x44, 0x33, 0x22, 0x11, 0xDD, 0xCC, 0xBB, 0xAA])
         );
         assert_eq!(
-            0xAABBCCDD11223344,
+            0xAABB_CCDD_1122_3344,
             length_in_lcn(&[0x44, 0x33, 0x22, 0x11, 0xDD, 0xCC, 0xBB, 0xAA, 0xFF])
         );
     }

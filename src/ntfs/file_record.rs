@@ -83,7 +83,7 @@ impl FileRecord {
     }
 
     pub fn fr_number(&self) -> i64 {
-        self.header.fr_number as i64 | (self.header.seq_number as i64) << 48
+        i64::from(self.header.fr_number) | i64::from(self.header.seq_number) << 48
     }
 
     pub fn new(attrs: Vec<Attribute>, header: FileRecordHeader) -> Self {

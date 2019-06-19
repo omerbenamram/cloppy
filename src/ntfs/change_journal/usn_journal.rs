@@ -65,7 +65,9 @@ impl UsnJournal {
             let fr_buffer =
                 get_file_record(&self.volume, record.fr_number, &mut output_buffer).unwrap();
             let entry = FileRecord::parse_mft_entry(fr_buffer, self.volume_data);
-            entry.map(|f| usn_records.push(record.into_change(f)));
+            if let Some(f) = entry {
+                usn_records.push(record.into_change(f))
+            }
         }
         self.next_usn = next_usn;
         Ok(usn_records)

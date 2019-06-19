@@ -22,7 +22,7 @@ impl VolumeData {
         }
     }
     pub fn initial_offset(&self) -> u64 {
-        self.bytes_per_cluster as u64 * self.mft_start_lcn
+        u64::from(self.bytes_per_cluster) * self.mft_start_lcn
     }
 
     pub fn clusters_per_fr(&self) -> u32 {
@@ -45,7 +45,7 @@ mod tests {
             0, 64,
         ];
         let output = VolumeData {
-            mft_start_lcn: 786432,
+            mft_start_lcn: 786_432,
             bytes_per_cluster: 4096,
             bytes_per_sector: 512,
             bytes_per_file_record: 1024,
