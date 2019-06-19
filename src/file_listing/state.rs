@@ -39,11 +39,11 @@ impl Clone for FilesState {
 }
 
 impl PluginState for FilesState {
-    fn any_ref(&self) -> &Any {
+    fn any_ref(&self) -> &dyn Any {
         self
     }
 
-    fn any_mut(&mut self) -> &mut Any {
+    fn any_mut(&mut self) -> &mut dyn Any {
         self
     }
 }

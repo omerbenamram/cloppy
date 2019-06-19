@@ -48,7 +48,7 @@ impl MftReader {
         for (i, run) in mft.data_attr.datarun.iter().enumerate() {
             absolute_lcn_offset += run.offset_lcn;
             let absolute_offset = absolute_lcn_offset as u64 * volume_data.bytes_per_cluster as u64;
-            let mut file_record_count = run.length_lcn * volume_data.clusters_per_fr() as u64;
+            let file_record_count = run.length_lcn * volume_data.clusters_per_fr() as u64;
 
             let full_runs_count = file_record_count / FR_AT_ONCE;
             let partial_run_size = file_record_count % FR_AT_ONCE;

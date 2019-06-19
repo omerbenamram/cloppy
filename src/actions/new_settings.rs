@@ -1,7 +1,7 @@
 use failure::Error;
 use gui::event::Event;
 use gui::Gui;
-use plugin::State;
+
 use std::collections::HashMap;
 use settings::Setting;
 

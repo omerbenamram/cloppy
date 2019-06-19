@@ -22,7 +22,7 @@ use winapi::shared::minwindef::*;
 use winapi::shared::windef::*;
 use winapi::um::commctrl::*;
 use winapi::um::winuser::*;
-use actions::Action;
+
 
 pub unsafe fn on_select_all(event: Event) {
     let focused_wnd = GetFocus();
@@ -79,7 +79,7 @@ pub unsafe extern "system" fn wnd_proc(wnd: HWND, message: UINT, w_param: WPARAM
             let settings: Box<HashMap<Setting, String>> = Box::from_raw(params.settings);
             match Gui::create(event, instance, dispatcher, logger, *settings) {
                 Err(msg) => panic!(failure_to_string(msg)),
-                Ok(mut gui) => SetWindowLongPtrW(wnd, GWLP_USERDATA, Box::into_raw(Box::new(gui)) as LONG_PTR),
+                Ok(gui) => SetWindowLongPtrW(wnd, GWLP_USERDATA, Box::into_raw(Box::new(gui)) as LONG_PTR),
             };
             let gui = &mut *(GetWindowLongPtrW(wnd, GWLP_USERDATA) as *mut ::gui::Gui);
             gui.handle_action(ComposedAction::ResizeWindowFromSettings, event);

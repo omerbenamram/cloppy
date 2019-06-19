@@ -4,7 +4,7 @@ use actions::shortcuts::register_global_files;
 use actions::SimpleAction;
 use dispatcher::GuiDispatcher;
 use dispatcher::UiAsyncMessage;
-use enum_primitive::FromPrimitive;
+
 use failure::Error;
 use gui::event::Event;
 use gui::input_field::InputSearch;
@@ -15,7 +15,7 @@ use gui::status_bar::StatusBar;
 use gui::utils::ToWide;
 use gui::wnd_proc::wnd_proc;
 use parking_lot::Mutex;
-use plugin::State;
+
 pub use self::wnd::Wnd;
 use settings::Setting;
 use slog::Logger;

@@ -78,7 +78,7 @@ fn draw_text_with_matches(default_font: HFONT, bold_font: HFONT, matches: &[Matc
     let mut position = pos.clone();
     for m in matches {
         let font = if m.matched { bold_font } else { default_font };
-        let mut rect = draw_text_section(font, hdc, &mut position, &m.text);
+        let rect = draw_text_section(font, hdc, &mut position, &m.text);
         position.left += rect.right;
     };
     position

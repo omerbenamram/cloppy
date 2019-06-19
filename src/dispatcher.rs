@@ -12,13 +12,13 @@ use std::sync::Arc;
 use winapi::um::winnt::LPWSTR;
 
 pub struct GuiDispatcher {
-    plugin: Arc<Plugin>,
+    plugin: Arc<dyn Plugin>,
     state: Box<State>,
     sender: channel::Sender<UiAsyncMessage>,
 }
 
 impl GuiDispatcher {
-    pub fn new(plugin: Arc<Plugin>, state: Box<State>, sender: channel::Sender<UiAsyncMessage>) -> GuiDispatcher {
+    pub fn new(plugin: Arc<dyn Plugin>, state: Box<State>, sender: channel::Sender<UiAsyncMessage>) -> GuiDispatcher {
         GuiDispatcher {
             plugin,
             state,

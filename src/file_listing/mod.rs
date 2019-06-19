@@ -112,7 +112,7 @@ impl Plugin for FileListing {
         State::new(msg, count, files_state)
     }
 
-    fn default_plugin_state(&self) -> Box<PluginState> {
+    fn default_plugin_state(&self) -> Box<dyn PluginState> {
         Box::new(FilesState::default())
     }
 }

@@ -7,7 +7,7 @@ pub trait Plugin: Sync + Send {
     fn custom_draw_item(&self, event: Event, state: &State) -> CustomDrawResult;
     fn prepare_item(&self, item_id: usize, state: &mut State);
     fn handle_message(&self, msg: &str, prev_state: &State) -> State;
-    fn default_plugin_state(&self) -> Box<PluginState>;
+    fn default_plugin_state(&self) -> Box<dyn PluginState>;
 }
 
 pub enum DrawResult {
@@ -21,17 +21,17 @@ pub enum CustomDrawResult {
 }
 
 pub trait PluginState: Any + PluginStateClone + Sync + Send {
-    fn any_ref(&self) -> &Any;
-    fn any_mut(&mut self) -> &mut Any;
+    fn any_ref(&self) -> &dyn Any;
+    fn any_mut(&mut self) -> &mut dyn Any;
 }
 
 pub trait PluginStateClone {
-    fn clone_box(&self) -> Box<PluginState>;
+    fn clone_box(&self) -> Box<dyn PluginState>;
 }
 
 impl<T> PluginStateClone for T
     where T: 'static + PluginState + Clone {
-    fn clone_box(&self) -> Box<PluginState> {
+    fn clone_box(&self) -> Box<dyn PluginState> {
         Box::new(self.clone())
     }
 }
@@ -39,7 +39,7 @@ impl<T> PluginStateClone for T
 pub struct State {
     count: usize,
     query: String,
-    plugin_state: Box<PluginState>,
+    plugin_state: Box<dyn PluginState>,
 }
 
 impl Clone for State {
@@ -49,7 +49,7 @@ impl Clone for State {
 }
 
 impl State {
-    pub fn new<T: Into<String>>(query: T, count: usize, plugin_state: Box<PluginState>) -> State {
+    pub fn new<T: Into<String>>(query: T, count: usize, plugin_state: Box<dyn PluginState>) -> State {
         State {
             query: query.into(),
             count,
