@@ -1,5 +1,5 @@
-use ntfs::change_journal::UsnRecord;
-use ntfs::file_record::FileRecord;
+use crate::ntfs::change_journal::UsnRecord;
+use crate::ntfs::file_record::FileRecord;
 use rusqlite::Result;
 use rusqlite::Row;
 use std::u32;

@@ -11,7 +11,6 @@ extern crate crossbeam_channel;
 extern crate enum_primitive;
 #[macro_use]
 extern crate failure;
-#[macro_use]
 extern crate failure_derive;
 extern crate ini;
 #[macro_use]
@@ -35,18 +34,18 @@ extern crate typed_builder;
 extern crate winapi;
 
 use crossbeam_channel as channel;
-use dispatcher::GuiDispatcher;
-use dispatcher::UiAsyncMessage;
-use errors::failure_to_string;
-use errors::MyErrorKind::UserSettingsError;
+use crate::dispatcher::GuiDispatcher;
+use crate::dispatcher::UiAsyncMessage;
+use crate::errors::failure_to_string;
+use crate::errors::MyErrorKind::UserSettingsError;
 use failure::Error;
 use failure::ResultExt;
-use gui::GuiCreateParams;
-use gui::Wnd;
-use plugin::Plugin;
-use plugin::State;
-use plugin_handler::PluginHandler;
-use settings::UserSettings;
+use crate::gui::GuiCreateParams;
+use crate::gui::Wnd;
+use crate::plugin::Plugin;
+use crate::plugin::State;
+use crate::plugin_handler::PluginHandler;
+use crate::settings::UserSettings;
 use std::sync::Arc;
 use std::thread;
 

@@ -1,7 +1,7 @@
-use file_listing::file_entity::FileEntity;
-use file_listing::file_entity::FileId;
-use file_listing::storage::Storage;
-use file_listing::storage::StorageItem;
+use crate::file_listing::file_entity::FileEntity;
+use crate::file_listing::file_entity::FileId;
+use crate::file_listing::storage::Storage;
+use crate::file_listing::storage::StorageItem;
 use std::borrow::Borrow;
 use std::cmp::Ordering;
 use twoway;
@@ -194,9 +194,9 @@ impl Files {
 
 #[cfg(test)]
 mod tests {
-    use file_listing::file_entity::FileId;
-    use ntfs::attributes::FilenameAttr;
-    use ntfs::file_record::FileRecord;
+    use crate::file_listing::file_entity::FileId;
+    use crate::ntfs::attributes::FilenameAttr;
+    use crate::ntfs::file_record::FileRecord;
     use super::*;
 
     const FILE: u16 = 1;

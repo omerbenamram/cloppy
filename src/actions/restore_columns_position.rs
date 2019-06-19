@@ -1,10 +1,10 @@
 use failure::Error;
 use failure::ResultExt;
-use gui::event::Event;
-use gui::Gui;
-use gui::Wnd;
-use settings::Setting;
-use settings::setting_to_int;
+use crate::gui::event::Event;
+use crate::gui::Gui;
+use crate::gui::Wnd;
+use crate::settings::Setting;
+use crate::settings::setting_to_int;
 use std::io;
 use winapi::shared::minwindef::LPARAM;
 use winapi::shared::minwindef::WPARAM;

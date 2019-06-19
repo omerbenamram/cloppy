@@ -1,8 +1,8 @@
 use byteorder::{ByteOrder, LittleEndian};
-use errors::MyErrorKind::UsnRecordVersionUnsupported;
+use crate::errors::MyErrorKind::UsnRecordVersionUnsupported;
 use failure::Error;
-use ntfs::file_record::FileRecord;
-use ntfs::windows_api::windows_string;
+use crate::ntfs::file_record::FileRecord;
+use crate::ntfs::windows_api::windows_string;
 
 #[derive(Debug, PartialEq)]
 pub enum UsnChange {

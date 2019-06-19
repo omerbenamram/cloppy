@@ -1,7 +1,7 @@
-use errors::MyErrorKind::WindowsError;
+use crate::errors::MyErrorKind::WindowsError;
 use failure::Error;
 use failure::ResultExt;
-use gui::Wnd;
+use crate::gui::Wnd;
 use std::io;
 use std::mem;
 use winapi::shared::minwindef::*;

@@ -1,10 +1,10 @@
-use file_listing::list::icon::Icons;
-use file_listing::list::item::DisplayItem;
-use file_listing::list::item::Match;
-use gui::default_font::default_fonts;
-use gui::event::Event;
-use plugin::CustomDrawResult;
-use plugin::DrawResult;
+use crate::file_listing::list::icon::Icons;
+use crate::file_listing::list::item::DisplayItem;
+use crate::file_listing::list::item::Match;
+use crate::gui::default_font::default_fonts;
+use crate::gui::event::Event;
+use crate::plugin::CustomDrawResult;
+use crate::plugin::DrawResult;
 use std::collections::HashMap;
 use std::mem;
 use std::ptr;

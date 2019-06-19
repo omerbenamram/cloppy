@@ -1,12 +1,12 @@
 use failure::Error;
-use ntfs::file_record::FileRecord;
-use ntfs::FR_AT_ONCE;
-use ntfs::volume_data::VolumeData;
+use crate::ntfs::file_record::FileRecord;
+use crate::ntfs::FR_AT_ONCE;
+use crate::ntfs::volume_data::VolumeData;
 use slog::Logger;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use windows::async_io::{
+use crate::windows::async_io::{
     AsyncFile,
     BufferPool,
     InputOperation,

@@ -1,4 +1,4 @@
-use errors::MyErrorKind::WindowsError;
+use crate::errors::MyErrorKind::WindowsError;
 use failure::{Error, ResultExt};
 use std::fs::{
     File,
@@ -29,7 +29,7 @@ use winapi::um::minwinbase::{
 use winapi::um::winbase::FILE_FLAG_OVERLAPPED;
 use winapi::um::winbase::INFINITE;
 use winapi::um::winnt::HANDLE;
-use windows::read_overlapped;
+use crate::windows::read_overlapped;
 
 unsafe impl Send for IOCompletionPort {}
 

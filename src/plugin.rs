@@ -1,4 +1,4 @@
-use gui::event::Event;
+use crate::gui::event::Event;
 use std::any::Any;
 use winapi::shared::ntdef::LPWSTR;
 

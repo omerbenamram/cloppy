@@ -1,18 +1,18 @@
 use byteorder::{ByteOrder, LittleEndian};
-use errors::MyErrorKind::UsnJournalError;
+use crate::errors::MyErrorKind::UsnJournalError;
 use failure::{
     Error,
     ResultExt,
 };
-use ntfs::change_journal::usn_record::UsnChange;
-use ntfs::change_journal::usn_record::UsnRecord;
-use ntfs::file_record::FileRecord;
-use ntfs::volume_data::VolumeData;
-use ntfs::windows_api::get_file_record;
-use ntfs::windows_api::get_usn_journal;
-use ntfs::windows_api::get_volume_data;
-use ntfs::windows_api::read_usn_journal;
-use ntfs::windows_api::UsnJournal as WinJournal;
+use crate::ntfs::change_journal::usn_record::UsnChange;
+use crate::ntfs::change_journal::usn_record::UsnRecord;
+use crate::ntfs::file_record::FileRecord;
+use crate::ntfs::volume_data::VolumeData;
+use crate::ntfs::windows_api::get_file_record;
+use crate::ntfs::windows_api::get_usn_journal;
+use crate::ntfs::windows_api::get_volume_data;
+use crate::ntfs::windows_api::read_usn_journal;
+use crate::ntfs::windows_api::UsnJournal as WinJournal;
 use std::fs::File;
 use std::mem;
 use std::path::Path;

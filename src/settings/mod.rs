@@ -1,4 +1,4 @@
-use errors::MyErrorKind::*;
+use crate::errors::MyErrorKind::*;
 use failure::Error;
 use failure::ResultExt;
 use ini::Ini;
@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use strum::AsStaticRef;
 use strum::IntoEnumIterator;
-use windows;
+use crate::windows;
 
 #[derive(AsStaticStr, EnumString, EnumIter, Display, Eq, Hash, PartialEq)]
 pub enum Setting {

@@ -1,4 +1,4 @@
-use gui::Wnd;
+use crate::gui::Wnd;
 use winapi::shared::minwindef::LPARAM;
 use winapi::shared::minwindef::WPARAM;
 use winapi::shared::windef::HWND;

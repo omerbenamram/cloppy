@@ -1,4 +1,4 @@
-use gui::utils;
+use crate::gui::utils;
 use std::io;
 use winapi::shared::windef::HACCEL;
 use winapi::um::winuser::*;

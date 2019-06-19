@@ -1,4 +1,4 @@
-use errors::MyErrorKind::WindowsError;
+use crate::errors::MyErrorKind::WindowsError;
 use failure::{Error, ResultExt};
 use std::mem;
 use std::ptr;

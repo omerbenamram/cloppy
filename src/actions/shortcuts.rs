@@ -1,9 +1,9 @@
-use actions::Action;
-use actions::SimpleAction;
+use crate::actions::Action;
+use crate::actions::SimpleAction;
 use failure::Error;
 use failure::ResultExt;
-use gui::event::Event;
-use gui::Wnd;
+use crate::gui::event::Event;
+use crate::gui::Wnd;
 use num::FromPrimitive;
 use slog::Logger;
 use std::io;

@@ -1,8 +1,8 @@
-use errors::MyErrorKind::WindowsError;
+use crate::errors::MyErrorKind::WindowsError;
 use failure::Error;
 use failure::ResultExt;
-use gui::utils;
-use gui::wnd_class;
+use crate::gui::utils;
+use crate::gui::wnd_class;
 use std::{io, mem, ptr};
 use std::ffi::OsString;
 use winapi::shared::minwindef::*;
@@ -15,7 +15,7 @@ use winapi::shared::windef::{
 use winapi::shared::winerror::ERROR_SUCCESS;
 use winapi::um::commctrl::GetEffectiveClientRect;
 use winapi::um::winuser::*;
-use windows::utils::FromWide;
+use crate::windows::utils::FromWide;
 
 #[derive(Copy, Clone)]
 pub struct Wnd {

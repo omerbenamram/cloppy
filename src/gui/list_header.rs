@@ -1,6 +1,6 @@
-use gui::event::Event;
-use gui::get_string;
-use gui::wnd::Wnd;
+use crate::gui::event::Event;
+use crate::gui::get_string;
+use crate::gui::wnd::Wnd;
 use std::mem;
 use winapi::shared::minwindef::*;
 use winapi::shared::ntdef::*;

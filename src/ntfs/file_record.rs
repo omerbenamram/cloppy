@@ -2,8 +2,8 @@ use byteorder::{
     ByteOrder,
     LittleEndian,
 };
-use ntfs::attributes::*;
-use ntfs::volume_data::VolumeData;
+use crate::ntfs::attributes::*;
+use crate::ntfs::volume_data::VolumeData;
 
 const DOS_NAMESPACE: u8 = 2;
 

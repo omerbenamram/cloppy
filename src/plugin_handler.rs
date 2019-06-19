@@ -1,16 +1,16 @@
 use crossbeam_channel::internal::channel;
-use dispatcher::UiAsyncMessage;
-use file_listing::FileListing;
-use gui::WM_GUI_ACTION;
-use gui::Wnd;
-use plugin::Plugin;
-use plugin::State;
-use settings::UserSettings;
+use crate::dispatcher::UiAsyncMessage;
+use crate::file_listing::FileListing;
+use crate::gui::WM_GUI_ACTION;
+use crate::gui::Wnd;
+use crate::plugin::Plugin;
+use crate::plugin::State;
+use crate::settings::UserSettings;
 use std::sync::Arc;
 use winapi::shared::minwindef::LPARAM;
 use winapi::shared::minwindef::WPARAM;
-use actions::SimpleAction;
-use actions::Action;
+use crate::actions::SimpleAction;
+use crate::actions::Action;
 
 pub struct PluginHandler {
     pub files: Arc<FileListing>,

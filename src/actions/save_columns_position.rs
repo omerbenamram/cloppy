@@ -1,17 +1,17 @@
 use failure::Error;
 use failure::ResultExt;
-use gui::event::Event;
-use gui::Gui;
+use crate::gui::event::Event;
+use crate::gui::Gui;
 use winapi::shared::minwindef::WPARAM;
 use winapi::um::commctrl::HDM_GETITEMCOUNT;
 use std::io;
-use errors::MyErrorKind::WindowsError;
-use gui::Wnd;
+use crate::errors::MyErrorKind::WindowsError;
+use crate::gui::Wnd;
 use std::string::ToString;
 use std::collections::HashMap;
-use dispatcher::UiAsyncMessage;
+use crate::dispatcher::UiAsyncMessage;
 use winapi::um::commctrl::LVM_GETCOLUMNWIDTH;
-use settings::Setting;
+use crate::settings::Setting;
 
 pub fn save_columns_position(_event: Event, gui: &mut Gui) -> Result<(), Error> {
     let item_count = get_column_count(gui.item_list().header().wnd())?;

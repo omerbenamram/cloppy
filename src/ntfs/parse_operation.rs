@@ -1,10 +1,10 @@
 use failure::Error;
-use ntfs::file_record::FileRecord;
-use ntfs::mft_parser::MftParser;
-use ntfs::volume_data::VolumeData;
-use ntfs::windows_api::get_volume_data;
+use crate::ntfs::file_record::FileRecord;
+use crate::ntfs::mft_parser::MftParser;
+use crate::ntfs::volume_data::VolumeData;
+use crate::ntfs::windows_api::get_volume_data;
 use slog::Logger;
-use sql::insert_files;
+use crate::sql::insert_files;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::SeekFrom;

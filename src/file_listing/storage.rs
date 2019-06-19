@@ -1,8 +1,8 @@
-use file_listing::file_entity::FileEntity;
-use file_listing::file_entity::FileId;
-use file_listing::file_entity::FileType;
-use file_listing::files::FileData;
-use file_listing::files::NameId;
+use crate::file_listing::file_entity::FileEntity;
+use crate::file_listing::file_entity::FileId;
+use crate::file_listing::file_entity::FileType;
+use crate::file_listing::files::FileData;
+use crate::file_listing::files::NameId;
 use std::borrow::Borrow;
 use std::collections::BTreeSet;
 use std::collections::HashMap;
@@ -160,7 +160,7 @@ impl<'a> Iterator for StorageIter<'a> {
 
 #[cfg(test)]
 mod tests {
-    use file_listing::file_entity::FileId;
+    use crate::file_listing::file_entity::FileId;
     use super::*;
 
     const FILE: u16 = 1;

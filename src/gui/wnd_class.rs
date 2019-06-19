@@ -1,8 +1,8 @@
-use errors::MyErrorKind::WindowsError;
+use crate::errors::MyErrorKind::WindowsError;
 use failure::Error;
 use failure::ResultExt;
-use gui::utils;
-use resources::constants::IDC_CLOPPY;
+use crate::gui::utils;
+use crate::resources::constants::IDC_CLOPPY;
 use std::{mem, ptr};
 use winapi::shared::minwindef::*;
 use winapi::shared::ntdef::LPCWSTR;

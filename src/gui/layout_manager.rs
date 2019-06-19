@@ -1,5 +1,5 @@
-use gui::event::Event;
-use gui::Gui;
+use crate::gui::event::Event;
+use crate::gui::Gui;
 use winapi::shared::minwindef::HIWORD;
 use winapi::shared::minwindef::LOWORD;
 use winapi::um::winuser::SWP_NOMOVE;

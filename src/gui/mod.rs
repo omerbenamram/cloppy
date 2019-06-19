@@ -1,23 +1,23 @@
-use actions::*;
-use actions::shortcuts::on_hotkey_event;
-use actions::shortcuts::register_global_files;
-use actions::SimpleAction;
-use dispatcher::GuiDispatcher;
-use dispatcher::UiAsyncMessage;
+use crate::actions::*;
+use crate::actions::shortcuts::on_hotkey_event;
+use crate::actions::shortcuts::register_global_files;
+use crate::actions::SimpleAction;
+use crate::dispatcher::GuiDispatcher;
+use crate::dispatcher::UiAsyncMessage;
 
 use failure::Error;
-use gui::event::Event;
-use gui::input_field::InputSearch;
-use gui::layout_manager::LayoutManager;
-use gui::list_view::ItemList;
-use gui::msg::Msg;
-use gui::status_bar::StatusBar;
-use gui::utils::ToWide;
-use gui::wnd_proc::wnd_proc;
+use crate::gui::event::Event;
+use crate::gui::input_field::InputSearch;
+use crate::gui::layout_manager::LayoutManager;
+use crate::gui::list_view::ItemList;
+use crate::gui::msg::Msg;
+use crate::gui::status_bar::StatusBar;
+use crate::gui::utils::ToWide;
+use crate::gui::wnd_proc::wnd_proc;
 use parking_lot::Mutex;
 
 pub use self::wnd::Wnd;
-use settings::Setting;
+use crate::settings::Setting;
 use slog::Logger;
 use std::collections::HashMap;
 use std::ptr;

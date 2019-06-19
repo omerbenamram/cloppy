@@ -1,4 +1,4 @@
-use errors::MyErrorKind::*;
+use crate::errors::MyErrorKind::*;
 use failure::Error;
 use failure::Fail;
 use std::fs::File;
@@ -12,7 +12,7 @@ use winapi::um::knownfolders::FOLDERID_RoamingAppData;
 use winapi::um::minwinbase::OVERLAPPED;
 use winapi::um::shlobj::KF_FLAG_DEFAULT;
 use winapi::um::shlobj::SHGetKnownFolderPath;
-use windows::utils::FromWide;
+use crate::windows::utils::FromWide;
 
 pub mod async_io;
 pub mod utils;

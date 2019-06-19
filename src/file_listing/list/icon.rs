@@ -1,6 +1,6 @@
-use file_listing::list::item::DisplayItem;
-use gui::get_string;
-use gui::image_list::ImageList;
+use crate::file_listing::list::item::DisplayItem;
+use crate::gui::get_string;
+use crate::gui::image_list::ImageList;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ffi::OsString;
@@ -61,7 +61,7 @@ impl Icons {
                     if let Some(cached) = cache.get(ext).map(|i| *i) {
                         cached
                     } else {
-                        use windows::utils::ToWide;
+                        use crate::windows::utils::ToWide;
                         let index = image_index_of(name.to_wide_null().as_mut_ptr() as LPCWSTR);
                         cache.insert(ext.to_owned(), index);
                         index

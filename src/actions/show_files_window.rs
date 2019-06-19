@@ -1,6 +1,6 @@
 use failure::Error;
-use gui::event::Event;
-use gui::Gui;
+use crate::gui::event::Event;
+use crate::gui::Gui;
 use winapi::um::winuser::SW_RESTORE;
 
 pub fn show_files_window(_event: Event, gui: &mut Gui) -> Result<(), Error> {

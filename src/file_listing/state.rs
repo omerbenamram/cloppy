@@ -1,6 +1,6 @@
-use file_listing::file_entity::FileId;
-use file_listing::list::item::DisplayItem;
-use plugin::PluginState;
+use crate::file_listing::file_entity::FileId;
+use crate::file_listing::list::item::DisplayItem;
+use crate::plugin::PluginState;
 use std::any::Any;
 use std::collections::HashMap;
 

@@ -1,7 +1,7 @@
 use byteorder::{ByteOrder, LittleEndian};
-use errors::MyErrorKind::*;
+use crate::errors::MyErrorKind::*;
 use failure::{Error, ResultExt};
-use ntfs::windows_api::structs::*;
+use crate::ntfs::windows_api::structs::*;
 use std::fs::File;
 use std::io;
 use std::mem;

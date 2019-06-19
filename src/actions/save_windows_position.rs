@@ -1,8 +1,8 @@
-use dispatcher::UiAsyncMessage;
+use crate::dispatcher::UiAsyncMessage;
 use failure::Error;
-use gui::event::Event;
-use gui::Gui;
-use settings::Setting;
+use crate::gui::event::Event;
+use crate::gui::Gui;
+use crate::settings::Setting;
 use std::collections::HashMap;
 
 pub fn save_windows_position(_event: Event, gui: &mut Gui) -> Result<(), Error> {

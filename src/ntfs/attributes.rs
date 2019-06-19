@@ -3,7 +3,7 @@ use byteorder::{
     LittleEndian,
     ReadBytesExt,
 };
-use ntfs::windows_api::windows_string;
+use crate::ntfs::windows_api::windows_string;
 use std::io::Cursor;
 
 const DATARUN_END: u8 = 0x00;
@@ -172,7 +172,7 @@ pub fn parse_attributes(input: &[u8], last_attr: u32) -> Vec<Attribute> {
 
 #[cfg(test)]
 mod tests {
-    use ntfs::attributes::AttributeType::*;
+    use crate::ntfs::attributes::AttributeType::*;
     use super::*;
 
 
